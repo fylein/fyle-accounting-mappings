@@ -38,9 +38,9 @@ def filter_expenses_based_on_state(expenses: List[Any], expense_group_settings: 
     expense_group_settings = ExpenseGroupSettingsAdapter(expense_group_settings, integration_type)
 
     allowed_reimbursable_import_state = REIMBURSABLE_IMPORT_STATE.get(expense_group_settings.expense_state)
-    reimbursable_expenses = list(filter(lambda expense: expense['fund_source'] == 'PERSONAL' and expense['state'] in allowed_reimbursable_import_state, expenses))
+    reimbursable_expenses = list(filter(lambda expense: expense['source_account_type'] == 'PERSONAL_CASH_ACCOUNT' and expense['state'] in allowed_reimbursable_import_state, expenses))
 
     allowed_ccc_import_state = CCC_IMPORT_STATE.get(expense_group_settings.ccc_expense_state)
-    ccc_expenses = list(filter(lambda expense: expense['fund_source'] == 'CCC' and expense['state'] in allowed_ccc_import_state, expenses))
+    ccc_expenses = list(filter(lambda expense: expense['source_account_type'] == 'PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT' and expense['state'] in allowed_ccc_import_state, expenses))
 
     return reimbursable_expenses + ccc_expenses
