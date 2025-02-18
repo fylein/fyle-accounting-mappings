@@ -1,5 +1,6 @@
 from typing import List, Any
 
+from .enums import ExpenseStateEnum
 from .constants import REIMBURSABLE_IMPORT_STATE, CCC_IMPORT_STATE
 from .models import ExpenseGroupSettingsAdapter
 
@@ -14,15 +15,15 @@ def get_expense_import_states(expense_group_settings: Any, integration_type: str
     expense_group_settings = ExpenseGroupSettingsAdapter(expense_group_settings, integration_type)
     expense_import_state = set()
 
-    if expense_group_settings.ccc_expense_state == 'APPROVED':
-        expense_import_state = {'APPROVED', 'PAYMENT_PROCESSING', 'PAID'}
+    if expense_group_settings.ccc_expense_state == ExpenseStateEnum.APPROVED:
+        expense_import_state = {ExpenseStateEnum.APPROVED, ExpenseStateEnum.PAYMENT_PROCESSING, ExpenseStateEnum.PAID}
 
-    if expense_group_settings.expense_state == 'PAYMENT_PROCESSING':
-        expense_import_state.add('PAYMENT_PROCESSING')
-        expense_import_state.add('PAID')
+    if expense_group_settings.expense_state == ExpenseStateEnum.PAYMENT_PROCESSING:
+        expense_import_state.add(ExpenseStateEnum.PAYMENT_PROCESSING)
+        expense_import_state.add(ExpenseStateEnum.PAID)
 
-    if expense_group_settings.expense_state == 'PAID' or expense_group_settings.ccc_expense_state == 'PAID':
-        expense_import_state.add('PAID')
+    if expense_group_settings.expense_state == ExpenseStateEnum.PAID or expense_group_settings.ccc_expense_state == ExpenseStateEnum.PAID:
+        expense_import_state.add(ExpenseStateEnum.PAID)
 
     return list(expense_import_state)
 

@@ -1,13 +1,13 @@
-from .enums import ExpenseImportSourceEnum
+from .enums import ExpenseImportSourceEnum, ExpenseStateEnum
 
 REIMBURSABLE_IMPORT_STATE = {
-    'PAYMENT_PROCESSING': ['PAYMENT_PROCESSING', 'PAID'],
-    'PAID': ['PAID']
+    ExpenseStateEnum.PAYMENT_PROCESSING: [ExpenseStateEnum.PAYMENT_PROCESSING, ExpenseStateEnum.PAID],
+    ExpenseStateEnum.PAID: [ExpenseStateEnum.PAID]
 }
 
 CCC_IMPORT_STATE = {
-    'APPROVED': ['APPROVED', 'PAYMENT_PROCESSING', 'PAID'],
-    'PAID': ['PAID']
+    ExpenseStateEnum.APPROVED: [ExpenseStateEnum.APPROVED, ExpenseStateEnum.PAYMENT_PROCESSING, ExpenseStateEnum.PAID],
+    ExpenseStateEnum.PAID: [ExpenseStateEnum.PAID]
 }
 
 IMPORTED_FROM_CHOICES =  (
