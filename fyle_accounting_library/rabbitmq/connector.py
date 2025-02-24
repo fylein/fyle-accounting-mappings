@@ -11,12 +11,22 @@ logger = logging.getLogger(__name__)
 class RabbitMQ(RabbitMQConnector):
     def __init__(self, rabbitmq_exchange: str):
         rabbitmq_url = os.environ.get('RABBITMQ_URL')
-
         self.qconnector: QConnector = RabbitMQConnector(rabbitmq_url, rabbitmq_exchange)
         self.qconnector.connect()
 
     def publish(self, routing_key, body):
         self.qconnector.publish(routing_key, json.dumps(body))
+
+    def is_connected(self):
+        try:
+            return self.qconnector.channel.is_open
+        except Exception:
+            return False
+
+    def ensure_connection(self):
+        """Ensures the connection is active, reconnects if needed"""
+        if not self.is_connected():
+            self.qconnector.connect()
 
 
 class RabbitMQConnection:
@@ -32,18 +42,6 @@ class RabbitMQConnection:
     def _create_connection(cls, exchange_name):
         instance = RabbitMQ(exchange_name)
         return instance
-
-    def is_connected(self):
-        try:
-            # Check if connection is still open and healthy
-            return self.qconnector.channel.is_open
-        except Exception:
-            return False
-
-    def ensure_connection(self):
-        """Ensures the connection is active, reconnects if needed"""
-        if not self.is_connected():
-            self.connect()
 
     def publish(self, routing_key, payload):
         """Wrapper around publish to ensure connection is healthy"""
