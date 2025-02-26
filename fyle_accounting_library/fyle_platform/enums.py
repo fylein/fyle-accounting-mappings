@@ -15,3 +15,10 @@ class ExpenseStateEnum:
     PAYMENT_PROCESSING = 'PAYMENT_PROCESSING'
     PAID = 'PAID'
     APPROVED = 'APPROVED'
+
+
+class RoutingKeyEnum:
+    """
+    Enum for Routing Key
+    """
+    EXPORT = 'exports.p1'
