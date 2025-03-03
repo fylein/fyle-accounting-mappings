@@ -4,6 +4,7 @@ import logging
 
 from common.qconnector import QConnector
 from common.qconnector import RabbitMQConnector
+from .data_class import RabbitMQData
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +15,8 @@ class RabbitMQ(RabbitMQConnector):
         self.qconnector: QConnector = RabbitMQConnector(rabbitmq_url, rabbitmq_exchange)
         self.qconnector.connect()
 
-    def publish(self, routing_key, body):
-        self.qconnector.publish(routing_key, json.dumps(body))
+    def publish(self, routing_key, body: RabbitMQData):
+        self.qconnector.publish(routing_key, body.to_json())
 
     def is_connected(self):
         try:
