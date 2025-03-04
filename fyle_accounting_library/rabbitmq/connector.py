@@ -15,8 +15,9 @@ class RabbitMQ(RabbitMQConnector):
         self.qconnector: QConnector = RabbitMQConnector(rabbitmq_url, rabbitmq_exchange)
         self.qconnector.connect()
 
-    def publish(self, routing_key, body: RabbitMQData):
-        self.qconnector.publish(routing_key, body.to_json())
+    def publish(self, routing_key, body: RabbitMQData = None):
+        message = '{}' if body is None else body.to_json()
+        self.qconnector.publish(routing_key, message)
 
     def is_connected(self):
         try:
