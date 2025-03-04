@@ -18,7 +18,7 @@ setuptools.setup(
     keywords=['fyle', 'rest', 'django-rest-framework', 'api', 'python', 'accounting'],
     url='https://github.com/fylein/fyle-accounting-mappings',
     packages=setuptools.find_packages(),
-    install_requires=['django>=3.0.2', 'django-rest-framework>=0.1.0'],
+    install_requires=['django>=3.0.2', 'django-rest-framework>=0.1.0', 'brotli>=1.1.0'],
     include_package_data=True,
     classifiers=[
         'Framework :: Django',
