@@ -22,3 +22,4 @@ class RoutingKeyEnum:
     Enum for Routing Key
     """
     EXPORT = 'exports.p1'
+    UPLOAD_S3 = 'upload.s3'
