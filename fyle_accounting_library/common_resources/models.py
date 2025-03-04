@@ -16,15 +16,15 @@ class DimensionDetail(models.Model):
     """
     id = models.AutoField(primary_key=True)
     workspace = models.ForeignKey(Workspace, on_delete=models.PROTECT, help_text='Reference to Workspace')
-    attribute_type = models.CharField(max_length=255, help_text='Sage Intacct Attribute Type')
-    display_name = models.CharField(max_length=255, help_text='Sage Intacct Attribute Term Label')
+    attribute_type = models.CharField(max_length=255, help_text='Attribute Type')
+    display_name = models.CharField(max_length=255, help_text='Attribute Display Name')
     source_type = models.CharField(help_text='Source Type', null=False, default=DimensionDetailSourceTypeEnum.ACCOUNTING.value, max_length=100, choices=SOURCE_TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True, help_text='Created at')
     updated_at = models.DateTimeField(auto_now=True, help_text='Updated at')
 
     class Meta:
         db_table = 'dimension_details'
-        unique_together = ('attribute_type', 'workspace_id', 'source_type')
+        unique_together = ('attribute_type', 'display_name', 'workspace_id', 'source_type')
 
     @staticmethod
     def bulk_create_or_update_dimension_details(dimensions: list[dict], workspace_id: int, source_type: str) -> None:
