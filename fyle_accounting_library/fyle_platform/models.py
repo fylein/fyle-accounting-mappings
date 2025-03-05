@@ -44,6 +44,7 @@ class ExpenseGroupSettingsAdapter:
         """
         if name in self.mapping:
             mapped_name = self.mapping[name]
-            return getattr(self.settings, mapped_name)
+            # Safely get the mapped attribute, return None if it doesn't exist
+            return getattr(self.settings, mapped_name, None)
 
         return getattr(self.settings, name)
