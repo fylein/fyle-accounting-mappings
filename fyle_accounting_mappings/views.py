@@ -457,7 +457,7 @@ class DestinationAttributesView(LookupFieldMixin, ListAPIView):
     serializer_class = DestinationAttributeSerializer
     pagination_class = None
     filter_backends = (DjangoFilterBackend, JSONFieldFilterBackend,)
-    filterset_fields = {'attribute_type': {'exact', 'in'}, 'display_name': {'exact', 'in'}, 'active': {'exact'}}
+    filterset_fields = {'attribute_type': {'exact', 'in'}, 'display_name': {'exact', 'in'}, 'active': {'exact'}, 'destination_id': {'exact', 'in'}}
 
 
 class FyleFieldsView(ListAPIView):
