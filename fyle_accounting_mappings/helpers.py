@@ -313,6 +313,7 @@ class DestinationAttributeFilter(django_filters.FilterSet):
             'display_name': ['exact', 'in'],
             'value': ['icontains'],
             'code': ['icontains'],
+            'destination_id': ['exact', 'in']
         }
 
     def filter_value(self, queryset, name, value):
