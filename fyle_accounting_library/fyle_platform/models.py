@@ -23,8 +23,7 @@ class ExpenseGroupSettingsAdapter:
             'updated_at': 'updated_at'
         }
     }
-    # TODO: remove this later - have created it for other models as POC
-    COLUMN_MAPPINGS['xero'] = COLUMN_MAPPINGS['default']
+    COLUMN_MAPPINGS['xero'] = dict(COLUMN_MAPPINGS['default'])
     COLUMN_MAPPINGS['xero']['expense_state'] = 'reimbursable_expense_state'
 
     def __init__(self, settings_model: Any, integration_type: str = 'default'):
