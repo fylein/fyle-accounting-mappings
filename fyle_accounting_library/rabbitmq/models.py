@@ -15,4 +15,3 @@ class FailedEvent(models.Model):
 
     class Meta:
         db_table = 'failed_events'
-        app_label = 'fyle_accounting_library.rabbitmq'
