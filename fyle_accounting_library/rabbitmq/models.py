@@ -15,3 +15,4 @@ class FailedEvent(models.Model):
 
     class Meta:
         db_table = 'failed_events'
+        app_label = 'rabbitmq'
