@@ -14,6 +14,5 @@ IMPORTED_FROM_CHOICES =  (
     (ExpenseImportSourceEnum.WEBHOOK, 'WEBHOOK'),
     (ExpenseImportSourceEnum.DASHBOARD_SYNC, 'DASHBOARD_SYNC'),
     (ExpenseImportSourceEnum.DIRECT_EXPORT, 'DIRECT_EXPORT'),
-    (ExpenseImportSourceEnum.BACKGROUND_SCHEDULE, 'BACKGROUND_SCHEDULE'),
-    (ExpenseImportSourceEnum.INTERNAL, 'INTERNAL')
+    (ExpenseImportSourceEnum.BACKGROUND_SCHEDULE, 'BACKGROUND_SCHEDULE')
 )
