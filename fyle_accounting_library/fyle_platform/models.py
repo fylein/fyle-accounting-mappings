@@ -8,19 +8,12 @@ class ExpenseGroupSettingsAdapter:
     # Mapping of column names for different integrations
     COLUMN_MAPPINGS = {
         'default': {
-            'id': 'id',
-            'reimbursable_expense_group_fields': 'reimbursable_expense_group_fields',
-            'corporate_credit_card_expense_group_fields': 'corporate_credit_card_expense_group_fields',
             'expense_state': 'expense_state',
-            'reimbursable_expense_state': 'reimbursable_expense_state',
-            'ccc_expense_state': 'ccc_expense_state',
-            'reimbursable_export_date_type': 'reimbursable_export_date_type',
-            'ccc_export_date_type': 'ccc_export_date_type',
-            'import_card_credits': 'import_card_credits',
-            'split_expense_grouping': 'split_expense_grouping',
-            'workspace': 'workspace',
-            'created_at': 'created_at',
-            'updated_at': 'updated_at'
+            'ccc_expense_state': 'ccc_expense_state'
+        },
+        'sage_desktop': {
+            'expense_state': 'reimbursable_expense_state',
+            'ccc_expense_state': 'credit_card_expense_state'
         }
     }
     COLUMN_MAPPINGS['xero'] = dict(COLUMN_MAPPINGS['default'])

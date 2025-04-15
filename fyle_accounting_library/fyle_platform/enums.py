@@ -24,3 +24,11 @@ class RoutingKeyEnum:
     """
     EXPORT = 'exports.p1'
     UPLOAD_S3 = 'upload.s3'
+
+
+class SourceAccountTypeEnum:
+    """
+    Enum for Source Account Type
+    """
+    PERSONAL_CASH_ACCOUNT = 'PERSONAL_CASH_ACCOUNT'
+    PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT = 'PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT'
