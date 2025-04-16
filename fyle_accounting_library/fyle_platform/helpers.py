@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from .enums import ExpenseStateEnum
+from .enums import ExpenseStateEnum, SourceAccountTypeEnum
 from .constants import REIMBURSABLE_IMPORT_STATE, CCC_IMPORT_STATE
 from .models import ExpenseGroupSettingsAdapter
 
@@ -39,9 +39,25 @@ def filter_expenses_based_on_state(expenses: List[Any], expense_group_settings: 
     expense_group_settings = ExpenseGroupSettingsAdapter(expense_group_settings, integration_type)
 
     allowed_reimbursable_import_state = REIMBURSABLE_IMPORT_STATE.get(expense_group_settings.expense_state)
-    reimbursable_expenses = list(filter(lambda expense: expense['source_account_type'] == 'PERSONAL_CASH_ACCOUNT' and expense['state'] in allowed_reimbursable_import_state, expenses))
+    reimbursable_expenses = list(filter(lambda expense: expense['source_account_type'] == SourceAccountTypeEnum.PERSONAL_CASH_ACCOUNT and expense['state'] in allowed_reimbursable_import_state, expenses))
 
     allowed_ccc_import_state = CCC_IMPORT_STATE.get(expense_group_settings.ccc_expense_state)
-    ccc_expenses = list(filter(lambda expense: expense['source_account_type'] == 'PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT' and expense['state'] in allowed_ccc_import_state, expenses))
+    ccc_expenses = list(filter(lambda expense: expense['source_account_type'] == SourceAccountTypeEnum.PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT and expense['state'] in allowed_ccc_import_state, expenses))
 
     return reimbursable_expenses + ccc_expenses
+
+
+def get_source_account_types_based_on_export_modules(reimbursable_export_module: str, ccc_export_module: str) -> List[str]:
+    """
+    Get source account types based on the export modules
+    :param reimbursable_export_module: reimbursable export module
+    :param ccc_export_module: ccc export module
+    :return: list of source account types
+    """
+    source_account_types = []
+    if reimbursable_export_module:
+        source_account_types.append(SourceAccountTypeEnum.PERSONAL_CASH_ACCOUNT)
+    if ccc_export_module:
+        source_account_types.append(SourceAccountTypeEnum.PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT)
+
+    return source_account_types
