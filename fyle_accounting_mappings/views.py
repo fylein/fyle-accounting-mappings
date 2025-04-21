@@ -101,6 +101,8 @@ class MappingsView(ListCreateAPIView):
 
         destination_id = request.data.get('destination_id', None)
 
+        app_name = request.data.get('app_name', None)
+
         assert_valid(destination_value is not None, 'destination value not found')
         try:
             mappings = Mapping.create_or_update_mapping(
@@ -109,6 +111,7 @@ class MappingsView(ListCreateAPIView):
                 source_value=source_value,
                 destination_value=destination_value,
                 destination_id=destination_id,
+                app_name=app_name,
                 workspace_id=self.kwargs['workspace_id']
             )
 
