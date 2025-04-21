@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='expenseattributesdeletioncache',
-            name='merchant_ids',
+            name='merchant_list',
             field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=255), default=[], size=None),
         ),
     ]

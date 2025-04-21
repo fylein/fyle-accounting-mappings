@@ -114,7 +114,7 @@ class ExpenseAttributesDeletionCache(models.Model):
     category_ids = ArrayField(default=[], base_field=models.CharField(max_length=255))
     project_ids = ArrayField(default=[], base_field=models.CharField(max_length=255))
     cost_center_ids = ArrayField(default=[], base_field=models.CharField(max_length=255))
-    merchant_ids = ArrayField(default=[], base_field=models.CharField(max_length=255))
+    merchant_list = ArrayField(default=[], base_field=models.CharField(max_length=255))
     custom_field_list = JSONField(default=[])
     workspace = models.OneToOneField(Workspace, on_delete=models.PROTECT, help_text='Reference to Workspace model')
 
@@ -212,8 +212,8 @@ class ExpenseAttribute(models.Model):
         elif attribute_type == 'MERCHANT':
             deleted_attributes = ExpenseAttribute.objects.filter(
                 attribute_type=attribute_type, workspace_id=workspace_id, active=True
-            ).exclude(source_id__in=expense_attributes_deletion_cache.merchant_ids)
-            expense_attributes_deletion_cache.merchant_ids = []
+            ).exclude(value__in=expense_attributes_deletion_cache.merchant_list)
+            expense_attributes_deletion_cache.merchant_list = []
             expense_attributes_deletion_cache.save()
             disable_attributes(deleted_attributes)
 
