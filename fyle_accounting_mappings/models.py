@@ -113,6 +113,9 @@ class ExpenseAttributesDeletionCache(models.Model):
     id = models.AutoField(primary_key=True)
     category_ids = ArrayField(default=[], base_field=models.CharField(max_length=255))
     project_ids = ArrayField(default=[], base_field=models.CharField(max_length=255))
+    cost_center_ids = ArrayField(default=[], base_field=models.CharField(max_length=255))
+    merchant_list = ArrayField(default=[], base_field=models.CharField(max_length=255))
+    custom_field_list = JSONField(default=[])
     workspace = models.OneToOneField(Workspace, on_delete=models.PROTECT, help_text='Reference to Workspace model')
 
     class Meta:
@@ -166,8 +169,21 @@ class ExpenseAttribute(models.Model):
         :param attribute_type: Attribute type
         :param workspace_id: Workspace Id
         """
+        def disable_attributes(attributes):
+            attributes_to_be_updated = [
+                ExpenseAttribute(
+                    id=attribute.id,
+                    active=False,
+                    updated_at=datetime.now()
+                )
+                for attribute in attributes
+            ]
+
+            if attributes_to_be_updated:
+                ExpenseAttribute.objects.bulk_update(
+                    attributes_to_be_updated, fields=['active', 'updated_at'], batch_size=50)
+
         expense_attributes_deletion_cache = ExpenseAttributesDeletionCache.objects.get(workspace_id=workspace_id)
-        attributes_to_be_updated = []
 
         if attribute_type == 'CATEGORY':
             deleted_attributes = ExpenseAttribute.objects.filter(
@@ -175,25 +191,43 @@ class ExpenseAttribute(models.Model):
             ).exclude(source_id__in=expense_attributes_deletion_cache.category_ids)
             expense_attributes_deletion_cache.category_ids = []
             expense_attributes_deletion_cache.save()
-        else:
+            disable_attributes(deleted_attributes)
+
+        elif attribute_type == 'PROJECT':
             deleted_attributes = ExpenseAttribute.objects.filter(
                 attribute_type=attribute_type, workspace_id=workspace_id, active=True
             ).exclude(source_id__in=expense_attributes_deletion_cache.project_ids)
             expense_attributes_deletion_cache.project_ids = []
             expense_attributes_deletion_cache.save()
+            disable_attributes(deleted_attributes)
 
-        for attribute in deleted_attributes:
-            attributes_to_be_updated.append(
-                ExpenseAttribute(
-                    id=attribute.id,
-                    active=False,
-                    updated_at=datetime.now()
-                )
-            )
+        elif attribute_type == 'COST_CENTER':
+            deleted_attributes = ExpenseAttribute.objects.filter(
+                attribute_type=attribute_type, workspace_id=workspace_id, active=True
+            ).exclude(source_id__in=expense_attributes_deletion_cache.cost_center_ids)
+            expense_attributes_deletion_cache.cost_center_ids = []
+            expense_attributes_deletion_cache.save()
+            disable_attributes(deleted_attributes)
 
-        if attributes_to_be_updated:
-            ExpenseAttribute.objects.bulk_update(
-                attributes_to_be_updated, fields=['active', 'updated_at'], batch_size=50)
+        elif attribute_type == 'MERCHANT':
+            deleted_attributes = ExpenseAttribute.objects.filter(
+                attribute_type=attribute_type, workspace_id=workspace_id, active=True
+            ).exclude(value__in=expense_attributes_deletion_cache.merchant_list)
+            expense_attributes_deletion_cache.merchant_list = []
+            expense_attributes_deletion_cache.save()
+            disable_attributes(deleted_attributes)
+
+        else:
+            for items in expense_attributes_deletion_cache.custom_field_list:
+                attribute_type = items['attribute_type']
+                value_list = items['value_list']
+                deleted_attributes = ExpenseAttribute.objects.filter(
+                    attribute_type=attribute_type, workspace_id=workspace_id, active=True
+                ).exclude(value__in=value_list)
+                disable_attributes(deleted_attributes)
+
+            expense_attributes_deletion_cache.custom_field_list = []
+            expense_attributes_deletion_cache.save()
 
     @staticmethod
     def bulk_create_or_update_expense_attributes(
