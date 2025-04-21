@@ -543,7 +543,7 @@ class Mapping(models.Model):
 
     @staticmethod
     def create_or_update_mapping(source_type: str, destination_type: str,
-                                 source_value: str, destination_value: str, destination_id: str, workspace_id: int):
+                                 source_value: str, destination_value: str, destination_id: str, workspace_id: int, app_name: str = None):
         """
         Bulk update or create mappings
         source_type = 'Type of Source attribute, eg. CATEGORY',
@@ -555,10 +555,11 @@ class Mapping(models.Model):
         settings = MappingSetting.objects.filter(source_field=source_type, destination_field=destination_type,
                                                  workspace_id=workspace_id).first()
 
-        assert_valid(
-            settings is not None and settings != [],
-            'Settings for Destination  {0} / Source {1} not found'.format(destination_type, source_type)
-        )
+        if not (app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD'):
+            assert_valid(
+                settings is not None and settings != [],
+                'Settings for Destination  {0} / Source {1} not found'.format(destination_type, source_type)
+            )
 
         mapping, _ = Mapping.objects.update_or_create(
             source_type=source_type,
