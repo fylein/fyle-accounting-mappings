@@ -241,7 +241,7 @@ class MappingStatsView(ListCreateAPIView):
                 'destination_type': destination_type,
                 'workspace_id': self.kwargs['workspace_id']
             }
-            if app_name == 'Quickbooks Online' and source_type == 'CORPORATE_CARD':
+            if app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD':
                 filters.pop('destination_type')
                 filters['destination_type__in'] = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
 
