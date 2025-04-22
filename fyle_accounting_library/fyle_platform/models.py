@@ -16,6 +16,7 @@ class ExpenseGroupSettingsAdapter:
             'ccc_expense_state': 'credit_card_expense_state'
         }
     }
+    COLUMN_MAPPINGS['quickbooks_connector'] = dict(COLUMN_MAPPINGS['sage_desktop'])
     COLUMN_MAPPINGS['xero'] = dict(COLUMN_MAPPINGS['default'])
     COLUMN_MAPPINGS['xero']['expense_state'] = 'reimbursable_expense_state'
 
