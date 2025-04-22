@@ -241,6 +241,10 @@ class MappingStatsView(ListCreateAPIView):
                 'destination_type': destination_type,
                 'workspace_id': self.kwargs['workspace_id']
             }
+            if app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD':
+                filters.pop('destination_type')
+                filters['destination_type__in'] = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
+
             if source_type in ('PROJECT', 'CATEGORY'):
                 filters['source__active'] = True
 
@@ -275,10 +279,29 @@ class ExpenseAttributesMappingView(ListAPIView):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ExpenseAttributeFilter
 
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+
+        source_type = self.request.query_params.get('source_type')
+        app_name = self.request.query_params.get('app_name')
+        destination_type = self.request.query_params.get('destination_type', '')
+
+        if app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD':
+            destination_type_list = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
+        else:
+            destination_type_list = [destination_type]
+
+        context['destination_type_list'] = destination_type_list
+        return context
+
     def get_queryset(self):
         mapped = self.request.query_params.get('mapped')
         source_type = self.request.query_params.get('source_type')
         destination_type = self.request.query_params.get('destination_type', '')
+        destination_type = [destination_type]
+
+        app_name = self.request.query_params.get('app_name', None)
 
         # Process the 'mapped' parameter
         if mapped and mapped.lower() == 'false':
@@ -306,12 +329,16 @@ class ExpenseAttributesMappingView(ListAPIView):
             if activity_attribute and not activity_mapping:
                 base_filters &= ~Q(value='Activity')
 
+        
+        if app_name == 'Quickbooks Online' and source_type == 'CORPORATE_CARD':
+            destination_type = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
+        
         # Handle the 'mapped' parameter
         param = None
         if mapped is True:
-            param = Q(mapping__destination_type=destination_type)
+            param = Q(mapping__destination_type__in=destination_type)
         elif mapped is False:
-            param = ~Q(mapping__destination_type=destination_type)
+            param = ~Q(mapping__destination_type__in=destination_type)
         else:
             return ExpenseAttribute.objects.filter(base_filters).order_by('value')
 

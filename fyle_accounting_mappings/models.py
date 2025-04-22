@@ -594,6 +594,33 @@ class Mapping(models.Model):
                 settings is not None and settings != [],
                 'Settings for Destination  {0} / Source {1} not found'.format(destination_type, source_type)
             )
+        
+        # Special handling for CORPORATE_CARD to ensure only one mapping exists
+        if app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD':
+            source_attribute = ExpenseAttribute.objects.filter(
+                attribute_type=source_type, value__iexact=source_value, workspace_id=workspace_id
+            ).first() if source_value else None
+            
+            if source_attribute:
+                # Check if there's an existing mapping for this source with either destination type
+                existing_mapping = Mapping.objects.filter(
+                    source_type='CORPORATE_CARD',
+                    source_id=source_attribute.id,
+                    workspace_id=workspace_id,
+                    destination_type__in=['BANK_ACCOUNT', 'CREDIT_CARD_ACCOUNT']
+                ).first()
+                
+                if existing_mapping:
+                    # Update the existing mapping with the new destination type and value
+                    existing_mapping.destination_type = destination_type
+                    existing_mapping.destination = DestinationAttribute.objects.get(
+                        attribute_type=destination_type,
+                        value=destination_value,
+                        destination_id=destination_id,
+                        workspace_id=workspace_id
+                    )
+                    existing_mapping.save()
+                    return existing_mapping
 
         mapping, _ = Mapping.objects.update_or_create(
             source_type=source_type,
