@@ -283,7 +283,7 @@ class ExpenseAttributesMappingView(ListAPIView):
         mapped = self.request.query_params.get('mapped')
         source_type = self.request.query_params.get('source_type')
         destination_type = self.request.query_params.get('destination_type', '')
-        destination_type = list(destination_type)
+        destination_type = [destination_type]
 
         app_name = self.request.query_params.get('app_name', None)
 
