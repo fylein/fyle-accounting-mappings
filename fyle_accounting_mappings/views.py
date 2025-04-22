@@ -279,6 +279,22 @@ class ExpenseAttributesMappingView(ListAPIView):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ExpenseAttributeFilter
 
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+
+        source_type = self.request.query_params.get('source_type')
+        app_name = self.request.query_params.get('app_name')
+        destination_type = self.request.query_params.get('destination_type', '')
+
+        if app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD':
+            destination_type_list = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
+        else:
+            destination_type_list = [destination_type]
+
+        context['destination_type_list'] = destination_type_list
+        return context
+
     def get_queryset(self):
         mapped = self.request.query_params.get('mapped')
         source_type = self.request.query_params.get('source_type')

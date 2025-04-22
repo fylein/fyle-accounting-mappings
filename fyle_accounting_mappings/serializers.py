@@ -225,10 +225,11 @@ class MappingFilteredListSerializer(serializers.ListSerializer):
     """
 
     def to_representation(self, data):
-        params = self.context.get('request').query_params
-        destination_type = params.get('destination_type')
-        data = data.filter(destination_type=destination_type)
-        return super(MappingFilteredListSerializer, self).to_representation(data)
+        destination_type_list = self.context.get('destination_type_list', [])
+        if destination_type_list:
+            data = data.filter(destination_type__in=destination_type_list)
+
+        return super().to_representation(data)
 
 
 class MappingSerializerV2(serializers.ModelSerializer):
