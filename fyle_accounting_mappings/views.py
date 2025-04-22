@@ -330,7 +330,7 @@ class ExpenseAttributesMappingView(ListAPIView):
                 base_filters &= ~Q(value='Activity')
 
         
-        if app_name == 'Quickbooks Online' and source_type == 'CORPORATE_CARD':
+        if app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD':
             destination_type = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
         
         # Handle the 'mapped' parameter
