@@ -588,7 +588,6 @@ class Mapping(models.Model):
         """
         settings = MappingSetting.objects.filter(source_field=source_type, destination_field=destination_type,
                                                  workspace_id=workspace_id).first()
-        # CORPORATE_CARD -> CREDIT_CARD_ACCOUNT
 
         if not (app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD'):
             assert_valid(
