@@ -3,7 +3,7 @@ from typing import List, Dict
 from datetime import datetime
 from django.utils.module_loading import import_string
 from django.db import models, transaction
-from django.db.models import JSONField
+from django.db.models import Q, JSONField
 from django.contrib.postgres.fields import ArrayField
 
 from .exceptions import BulkError
@@ -356,28 +356,244 @@ class DestinationAttribute(models.Model):
 
     @staticmethod
     def bulk_create_or_update_destination_attributes(
-            attributes: List[Dict],
-            attribute_type: str,
-            workspace_id: int,
-            update: bool = False,
-            display_name: str = None,
-            attribute_disable_callback_path: str = None,
-            is_import_to_fyle_enabled: bool = False
+        attributes: List[Dict],
+        attribute_type: str,
+        workspace_id: int,
+        update: bool = False,
+        display_name: str = None,
+        attribute_disable_callback_path: str = None,
+        is_import_to_fyle_enabled: bool = False,
+        app_name: str = None,
+        skip_deletion: bool = False
     ):
         """
-        Create Destination Attributes in bulk
-        :param update: Update Pre-existing records or not
-        :param attribute_type: Attribute type
-        :param attributes: attributes = [{
-            'attribute_type': Type of attribute,
-            'display_name': Display_name of attribute_field,
-            'value': Value of attribute,
-            'destination_id': Destination Id of the attribute,
-            'detail': Extra Details of the attribute
-        }]
-        :param workspace_id: Workspace Id
-        :param attributes_disable_callback_path: API func to call when attribute is to be disabled
-        :return: created / updated attributes
+        Create or update Destination Attributes in bulk
+
+        Parameters:
+        - attributes: List of attribute dicts to be synced. Format:
+            {
+                'attribute_type': str,
+                'display_name': str,
+                'value': str,
+                'destination_id': str,
+                'detail': dict,
+                'active': bool,
+                'code': str
+            }
+        - attribute_type: Type of the attribute (e.g., 'PROJECT')
+        - workspace_id: Workspace ID (int)
+        - update: If True, update existing attributes if changed
+        - display_name: Optional, filter for specific display_name
+        - attribute_disable_callback_path: Optional dotted path to callback function
+        - is_import_to_fyle_enabled: Whether Fyle import is enabled
+        """
+        if app_name and app_name in ['Sage 300']:
+            DestinationAttribute.bulk_create_or_update_destination_attributes_with_delete_case(
+                attributes=attributes,
+                attribute_type=attribute_type,
+                workspace_id=workspace_id,
+                update=update,
+                display_name=display_name,
+                attribute_disable_callback_path=attribute_disable_callback_path,
+                is_import_to_fyle_enabled=is_import_to_fyle_enabled,
+                skip_deletion=skip_deletion
+            )
+        else:
+            DestinationAttribute.bulk_create_or_update_destination_attributes_without_delete_case(
+                attributes=attributes,
+                attribute_type=attribute_type,
+                workspace_id=workspace_id,
+                update=update,
+                display_name=display_name,
+                attribute_disable_callback_path=attribute_disable_callback_path,
+                is_import_to_fyle_enabled=is_import_to_fyle_enabled
+            )
+
+    @staticmethod
+    def bulk_create_or_update_destination_attributes_with_delete_case(
+        attributes: List[Dict],
+        attribute_type: str,
+        workspace_id: int,
+        update: bool = False,
+        display_name: str = None,
+        attribute_disable_callback_path: str = None,
+        is_import_to_fyle_enabled: bool = False,
+        skip_deletion: bool = False,
+    ):
+        is_custom_source_field = MappingSetting.objects.filter(
+            workspace_id=workspace_id,
+            destination_field=attribute_type,
+            is_custom=True
+        ).exists()
+
+        unique_attributes = {attribute['destination_id']: attribute for attribute in attributes}
+        attributes = list(unique_attributes.values())
+        destination_id_list = list(unique_attributes.keys())
+        value_list = [attribute['value'] for attribute in attributes]
+
+        # Filters to get existing attributes from DB
+        filters = {
+            'attribute_type': attribute_type,
+            'workspace_id': workspace_id
+        }
+
+        if display_name:
+            filters['display_name'] = display_name
+
+        # Fetch existing attributes from DB
+        existing_attributes = DestinationAttribute.objects.filter(
+            Q(destination_id__in=destination_id_list) | Q(value__in=value_list),
+            **filters,
+        ).values(
+            'id', 'value', 'destination_id', 'detail', 'active', 'code'
+        )
+
+        # Build lookup dictionaries
+        destination_id_to_existing = {}  # destination_id → full existing row
+        value_to_existing = {}           # value → full existing row
+
+        for existing in existing_attributes:
+            destination_id_to_existing[existing['destination_id']] = existing
+            value_to_existing[existing['value']] = existing
+
+        attributes_to_be_created = []
+        attributes_to_be_updated = []
+        attributes_to_disable = {}
+
+        processed_destination_ids = set()
+
+        for attribute in attributes:
+            destination_id = attribute['destination_id']
+            value = attribute['value']
+
+            # If destination_id is new, create
+            if destination_id not in destination_id_to_existing and destination_id not in processed_destination_ids:
+                # Check if the value already exists with a different destination_id → update the existing one
+                if value in value_to_existing:
+                    existing_row = value_to_existing[value]
+                    if (
+                        not skip_deletion
+                        and (attribute_type == 'ACCOUNT' and existing_row['detail'].get('account_type') == attribute.get('detail', {}).get('account_type'))
+                    ):
+                        attributes_to_disable[existing_row['destination_id']] = {
+                            'value': existing_row['value'],
+                            'updated_value': value,
+                            'code': existing_row['code'],
+                            'updated_code': attribute.get('code')
+                        }
+                        attributes_to_be_updated.append(
+                            DestinationAttribute(
+                                id=existing_row['id'],
+                                destination_id=destination_id,
+                                value=value,
+                                detail=attribute.get('detail'),
+                                active=attribute.get('active'),
+                                code=" ".join(attribute['code'].split()) if attribute.get('code') else None,
+                                updated_at=datetime.now()
+                            )
+                        )
+                else:
+                    # New attribute to be created
+                    attributes_to_be_created.append(
+                        DestinationAttribute(
+                            attribute_type=attribute_type,
+                            display_name=attribute['display_name'],
+                            value=value,
+                            destination_id=destination_id,
+                            detail=attribute.get('detail'),
+                            workspace_id=workspace_id,
+                            active=attribute.get('active'),
+                            code=" ".join(attribute['code'].split()) if attribute.get('code') else None
+                        )
+                    )
+                processed_destination_ids.add(destination_id)
+
+            # If destination_id already exists in DB
+            else:
+                existing = destination_id_to_existing[destination_id]
+                # Handle disabling if value/code mismatch
+                if attribute_disable_callback_path and is_import_to_fyle_enabled and (
+                    (value and existing['value'] and value.lower() != existing['value'].lower()) or
+                    ('code' in attribute and attribute['code'] and attribute['code'] != existing['code'])
+                ):
+                    attributes_to_disable[destination_id] = {
+                        'value': existing['value'],
+                        'updated_value': value,
+                        'code': existing['code'],
+                        'updated_code': attribute.get('code')
+                    }
+
+                # Update if fields differ and update flag is set
+                if update and (
+                    value != existing['value'] or
+                    attribute.get('detail') != existing['detail'] or
+                    attribute.get('active') != existing['active'] or
+                    ('code' in attribute and attribute['code'] and attribute['code'] != existing['code'])
+                ):
+                    attributes_to_be_updated.append(
+                        DestinationAttribute(
+                            id=existing['id'],
+                            value=value,
+                            detail=attribute.get('detail'),
+                            active=attribute.get('active'),
+                            code=" ".join(attribute['code'].split()) if attribute.get('code') else None,
+                            updated_at=datetime.now()
+                        )
+                    )
+
+        # Call disable callback if applicable
+        if attribute_disable_callback_path and attributes_to_disable:
+            import_string(attribute_disable_callback_path)(workspace_id, attributes_to_disable, is_import_to_fyle_enabled)
+
+        # Bulk create new attributes
+        if attributes_to_be_created:
+            DestinationAttribute.objects.bulk_create(attributes_to_be_created, batch_size=50)
+
+        # Bulk update modified attributes
+        if attributes_to_be_updated:
+            DestinationAttribute.objects.bulk_update(
+                attributes_to_be_updated,
+                fields=['destination_id', 'detail', 'value', 'active', 'updated_at', 'code'],
+                batch_size=50
+            )
+
+        if is_custom_source_field and attributes_to_disable:
+            import_string('fyle_integrations_imports.modules.expense_custom_fields.disable_expense_custom_fields')(
+                workspace_id=workspace_id,
+                attribute_type=attribute_type,
+                attributes_to_disable=attributes_to_disable
+            )
+
+    @staticmethod
+    def bulk_create_or_update_destination_attributes_without_delete_case(
+        attributes: List[Dict],
+        attribute_type: str,
+        workspace_id: int,
+        update: bool = False,
+        display_name: str = None,
+        attribute_disable_callback_path: str = None,
+        is_import_to_fyle_enabled: bool = False
+    ):
+        """
+        Create or update Destination Attributes in bulk
+
+        Parameters:
+        - attributes: List of attribute dicts to be synced. Format:
+            {
+                'attribute_type': str,
+                'display_name': str,
+                'value': str,
+                'destination_id': str,
+                'detail': dict,
+                'active': bool,
+                'code': str
+            }
+        - attribute_type: Type of the attribute (e.g., 'PROJECT')
+        - workspace_id: Workspace ID (int)
+        - update: If True, update existing attributes if changed
+        - display_name: Optional, filter for specific display_name
+        - attribute_disable_callback_path: Optional dotted path to callback function
+        - is_import_to_fyle_enabled: Whether Fyle import is enabled
         """
         unique_attributes = {attribute['destination_id']: attribute for attribute in attributes}
         attributes = list(unique_attributes.values())
@@ -467,6 +683,8 @@ class DestinationAttribute(models.Model):
         if attributes_to_be_updated:
             DestinationAttribute.objects.bulk_update(
                 attributes_to_be_updated, fields=['detail', 'value', 'active', 'updated_at', 'code'], batch_size=50)
+
+
 
 
 class ExpenseField(models.Model):

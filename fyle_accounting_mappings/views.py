@@ -201,8 +201,7 @@ class MappingStatsView(ListCreateAPIView):
             'workspace_id': self.kwargs['workspace_id']
         }
 
-        if source_type in ('PROJECT', 'CATEGORY'):
-            filters['active'] = True
+        filters['active'] = True
 
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
 
@@ -245,8 +244,7 @@ class MappingStatsView(ListCreateAPIView):
                 filters.pop('destination_type')
                 filters['destination_type__in'] = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
 
-            if source_type in ('PROJECT', 'CATEGORY'):
-                filters['source__active'] = True
+            filters['source__active'] = True
 
             mapped_attributes_count = Mapping.objects.filter(**filters).count()
             activity_mapping = None
@@ -314,9 +312,7 @@ class ExpenseAttributesMappingView(ListAPIView):
         # Prepare filters for the ExpenseAttribute
         base_filters = Q(workspace_id=self.kwargs['workspace_id']) & Q(attribute_type=source_type)
 
-        # Add 'active' filter if the source_type is 'PROJECT' or 'CATEGORY'
-        if source_type in ('PROJECT', 'CATEGORY'):
-            base_filters &= Q(active=True)
+        base_filters &= Q(active=True)
 
         # Handle Activity attribute if attribute mapping is present then show mappings else don't return Activity attribute
         if source_type == 'CATEGORY':
