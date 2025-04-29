@@ -386,6 +386,10 @@ class DestinationAttribute(models.Model):
         - display_name: Optional, filter for specific display_name
         - attribute_disable_callback_path: Optional dotted path to callback function
         - is_import_to_fyle_enabled: Whether Fyle import is enabled
+        - app_name: Name of the app (e.g., 'Sage 300')
+        - skip_deletion: If True, skip disabling of attributes in Fyle (for deletion then recreation case)
+                        Attributes such as COST_CODE have duplicate values belonging to different projects,
+                        we would skip the deletion of these attributes
         """
         if app_name and app_name in ['Sage 300']:
             DestinationAttribute.bulk_create_or_update_destination_attributes_with_delete_case(

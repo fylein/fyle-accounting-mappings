@@ -201,7 +201,8 @@ class MappingStatsView(ListCreateAPIView):
             'workspace_id': self.kwargs['workspace_id']
         }
 
-        filters['active'] = True
+        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE']:
+            filters['active'] = True
 
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
 
@@ -244,7 +245,8 @@ class MappingStatsView(ListCreateAPIView):
                 filters.pop('destination_type')
                 filters['destination_type__in'] = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
 
-            filters['source__active'] = True
+            if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE']:
+                filters['source__active'] = True
 
             mapped_attributes_count = Mapping.objects.filter(**filters).count()
             activity_mapping = None
@@ -312,7 +314,8 @@ class ExpenseAttributesMappingView(ListAPIView):
         # Prepare filters for the ExpenseAttribute
         base_filters = Q(workspace_id=self.kwargs['workspace_id']) & Q(attribute_type=source_type)
 
-        base_filters &= Q(active=True)
+        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE']:
+            base_filters &= Q(active=True)
 
         # Handle Activity attribute if attribute mapping is present then show mappings else don't return Activity attribute
         if source_type == 'CATEGORY':
