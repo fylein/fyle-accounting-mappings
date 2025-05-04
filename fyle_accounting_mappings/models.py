@@ -475,10 +475,8 @@ class DestinationAttribute(models.Model):
                 # Check if the value already exists with a different destination_id → update the existing one
                 if value in value_to_existing:
                     existing_row = value_to_existing[value]
-                    if (
-                        not skip_deletion
-                        and (attribute_type == 'ACCOUNT' and existing_row['detail'].get('account_type') == attribute.get('detail', {}).get('account_type'))
-                    ):
+
+                    if not (skip_deletion or (attribute_type == 'ACCOUNT' and existing_row['detail'].get('account_type') != attribute.get('detail', {}).get('account_type'))):
                         attributes_to_disable[existing_row['destination_id']] = {
                             'value': existing_row['value'],
                             'updated_value': value,
@@ -538,6 +536,7 @@ class DestinationAttribute(models.Model):
                         DestinationAttribute(
                             id=existing['id'],
                             value=value,
+                            destination_id=destination_id,
                             detail=attribute.get('detail'),
                             active=attribute.get('active'),
                             code=" ".join(attribute['code'].split()) if attribute.get('code') else None,
