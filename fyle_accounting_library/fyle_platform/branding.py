@@ -35,6 +35,6 @@ brand_id = None
 try:
     brand_id = settings.BRAND_ID
 except AttributeError:
-    brand_id = 'fyle'
+    brand_id = BrandIdEnum.FYLE
 
 feature_configuration = configurations.get(brand_id)
