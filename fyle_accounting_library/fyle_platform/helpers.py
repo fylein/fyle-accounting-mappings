@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from .enums import ExpenseStateEnum, SourceAccountTypeEnum
+from .enums import ExpenseStateEnum, SourceAccountTypeEnum, FundSourceEnum
 from .constants import REIMBURSABLE_IMPORT_STATE, CCC_IMPORT_STATE
 from .models import ExpenseGroupSettingsAdapter
 
@@ -61,3 +61,19 @@ def get_source_account_types_based_on_export_modules(reimbursable_export_module:
         source_account_types.append(SourceAccountTypeEnum.PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT)
 
     return source_account_types
+
+
+def get_fund_source_based_on_export_modules(reimbursable_export_module: str, ccc_export_module: str) -> List[str]:
+    """
+    Get fund source based on the export modules
+    :param reimbursable_export_module: reimbursable export module
+    :param ccc_export_module: ccc export module
+    :return: list of fund source
+    """
+    fund_source = []
+    if reimbursable_export_module:
+        fund_source.append(FundSourceEnum.PERSONAL)
+    if ccc_export_module:
+        fund_source.append(FundSourceEnum.CCC)
+
+    return fund_source

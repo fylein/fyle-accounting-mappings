@@ -7,6 +7,7 @@ class ExpenseImportSourceEnum:
     DIRECT_EXPORT = 'DIRECT_EXPORT'
     BACKGROUND_SCHEDULE = 'BACKGROUND_SCHEDULE'
     INTERNAL = 'INTERNAL'
+    CONFIGURATION_UPDATE = 'CONFIGURATION_UPDATE'
 
 
 class ExpenseStateEnum:
@@ -32,3 +33,19 @@ class SourceAccountTypeEnum:
     """
     PERSONAL_CASH_ACCOUNT = 'PERSONAL_CASH_ACCOUNT'
     PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT = 'PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT'
+
+
+class FundSourceEnum:
+    """
+    Enum for Fund Source
+    """
+    PERSONAL = 'PERSONAL'
+    CCC = 'CCC'
+
+
+class BrandIdEnum:
+    """
+    Enum for Brand ID
+    """
+    CO = 'co'
+    FYLE = 'fyle'
