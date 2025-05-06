@@ -41,3 +41,11 @@ class FundSourceEnum:
     """
     PERSONAL = 'PERSONAL'
     CCC = 'CCC'
+
+
+class BrandIdEnum:
+    """
+    Enum for Brand ID
+    """
+    CO = 'co'
+    FYLE = 'fyle'

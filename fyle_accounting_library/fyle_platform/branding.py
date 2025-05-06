@@ -3,6 +3,8 @@ from typing import Union
 
 from django.conf import settings
 
+from .enums import BrandIdEnum
+
 
 @dataclass
 class Configuration:
@@ -18,11 +20,11 @@ class FeatureConfig:
     feature: Feature
 
 configurations = {
-    'co': FeatureConfig(
+    BrandIdEnum.CO: FeatureConfig(
         configuration=Configuration(fixed_employee_field_mapping='VENDOR'),
         feature=Feature(real_time_export_1hr_orgs=False)
     ),
-    'fyle': FeatureConfig(
+    BrandIdEnum.FYLE: FeatureConfig(
         configuration=Configuration(fixed_employee_field_mapping=False),
         feature=Feature(real_time_export_1hr_orgs=True)
     )
