@@ -514,7 +514,9 @@ class DestinationAttribute(models.Model):
             else:
                 existing = destination_id_to_existing[destination_id]
                 # Handle disabling if value/code mismatch
-                if attribute_disable_callback_path and is_import_to_fyle_enabled and (
+                has_callback_path = attribute_disable_callback_path is not None or is_custom_source_field
+
+                if has_callback_path and is_import_to_fyle_enabled and (
                     (value and existing['value'] and value.lower() != existing['value'].lower()) or
                     ('code' in attribute and attribute['code'] and attribute['code'] != existing['code'])
                 ):
