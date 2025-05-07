@@ -25,6 +25,7 @@ class RoutingKeyEnum:
     """
     EXPORT = 'exports.p1'
     UPLOAD_S3 = 'upload.s3'
+    UTILITY = 'utility.*'
 
 
 class SourceAccountTypeEnum:
