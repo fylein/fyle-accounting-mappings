@@ -1,7 +1,4 @@
-from enum import Enum
-
-
-class RabbitMQExchangeEnum(Enum):
+class RabbitMQExchangeEnum:
     """
     Enum for RabbitMQ Exchange
     """
