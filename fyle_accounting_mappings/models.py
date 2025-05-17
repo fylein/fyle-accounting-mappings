@@ -391,7 +391,7 @@ class DestinationAttribute(models.Model):
                         Attributes such as COST_CODE have duplicate values belonging to different projects,
                         we would skip the deletion of these attributes
         """
-        if app_name and app_name in ['Sage 300', 'QBD_CONNECTOR']:
+        if app_name and app_name in ['Sage 300', 'QBD_CONNECTOR', 'NETSUITE']:
             DestinationAttribute.bulk_create_or_update_destination_attributes_with_delete_case(
                 attributes=attributes,
                 attribute_type=attribute_type,
@@ -476,7 +476,7 @@ class DestinationAttribute(models.Model):
                 if value in value_to_existing:
                     existing_row = value_to_existing[value]
 
-                    if not (skip_deletion or (attribute_type == 'ACCOUNT' and existing_row['detail'].get('account_type') != attribute.get('detail', {}).get('account_type'))):
+                    if not (skip_deletion or (attribute_type == 'ACCOUNT' and (existing_row.get('detail') or {}).get('account_type') != (attribute.get('detail') or {}).get('account_type'))):
                         attributes_to_disable[existing_row['destination_id']] = {
                             'value': existing_row['value'],
                             'updated_value': value,
