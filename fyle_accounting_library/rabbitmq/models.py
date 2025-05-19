@@ -12,6 +12,7 @@ class FailedEvent(models.Model):
     updated_at = models.DateTimeField(auto_now=True, help_text='Timestamp when the failed event was last updated')
     error_traceback = models.TextField(null=True, help_text='Error traceback from the failed event')
     workspace_id = models.IntegerField(null=True, help_text='Reference to the workspace where this event occurred')
+    is_resolved = models.BooleanField(default=False, help_text='Whether the failed event has been resolved')
 
     class Meta:
         db_table = 'failed_events'
