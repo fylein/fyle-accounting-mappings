@@ -201,7 +201,7 @@ class MappingStatsView(ListCreateAPIView):
             'workspace_id': self.kwargs['workspace_id']
         }
 
-        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'INTACCT']:
+        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'Sage Intacct']:
             filters['active'] = True
 
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
@@ -222,7 +222,7 @@ class MappingStatsView(ListCreateAPIView):
                 mapped_attributes_count = EmployeeMapping.objects.filter(
                     **filters, workspace_id=self.kwargs['workspace_id']
                 ).count()
-        elif source_type == 'CATEGORY' and app_name in ['INTACCT', 'Sage 300 CRE', 'Dynamics 365 Business Central', 'NetSuite']:
+        elif source_type == 'CATEGORY' and app_name in ['Sage Intacct', 'Sage 300 CRE', 'Dynamics 365 Business Central', 'NetSuite']:
             filters = {}
 
             if destination_type == 'ACCOUNT':
@@ -245,7 +245,7 @@ class MappingStatsView(ListCreateAPIView):
                 filters.pop('destination_type')
                 filters['destination_type__in'] = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
 
-            if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'INTACCT']:
+            if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'Sage Intacct']:
                 filters['source__active'] = True
 
             mapped_attributes_count = Mapping.objects.filter(**filters).count()
@@ -255,7 +255,7 @@ class MappingStatsView(ListCreateAPIView):
             activity_attribute_count = ExpenseAttribute.objects.filter(
                 attribute_type='CATEGORY', value='Activity', workspace_id=self.kwargs['workspace_id'], active=True).count()
             
-            if app_name in ('NetSuite', 'INTACCT', 'Sage 300 CRE', 'Dynamics 365 Business Central'):
+            if app_name in ('NetSuite', 'Sage Intacct', 'Sage 300 CRE', 'Dynamics 365 Business Central'):
                 activity_mapping = CategoryMapping.objects.filter(
                     source_category__value='Activity', workspace_id=self.kwargs['workspace_id']).first()
             else:
