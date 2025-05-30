@@ -391,7 +391,7 @@ class DestinationAttribute(models.Model):
                         Attributes such as COST_CODE have duplicate values belonging to different projects,
                         we would skip the deletion of these attributes
         """
-        if app_name and app_name in ['Sage 300', 'QBD_CONNECTOR', 'NETSUITE', 'XERO', 'QUICKBOOKS']:
+        if app_name and app_name in ['Sage 300', 'QBD_CONNECTOR', 'NETSUITE', 'XERO', 'QUICKBOOKS', 'INTACCT']:
             DestinationAttribute.bulk_create_or_update_destination_attributes_with_delete_case(
                 attributes=attributes,
                 attribute_type=attribute_type,
