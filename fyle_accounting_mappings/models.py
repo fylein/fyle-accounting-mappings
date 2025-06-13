@@ -1,6 +1,7 @@
 import importlib
+import logging
 from typing import List, Dict
-from datetime import datetime
+from datetime import datetime, timezone
 from django.utils.module_loading import import_string
 from django.db import models, transaction
 from django.db.models import Q, JSONField
@@ -13,6 +14,9 @@ from .mixins import AutoAddCreateUpdateInfoMixin
 
 workspace_models = importlib.import_module("apps.workspaces.models")
 Workspace = workspace_models.Workspace
+
+logger = logging.getLogger(__name__)
+logger.level = logging.INFO
 
 
 def validate_mapping_settings(mappings_settings: List[Dict]):
@@ -116,6 +120,7 @@ class ExpenseAttributesDeletionCache(models.Model):
     cost_center_ids = ArrayField(default=[], base_field=models.CharField(max_length=255))
     merchant_list = ArrayField(default=[], base_field=models.CharField(max_length=255))
     custom_field_list = JSONField(default=[])
+    updated_at = models.DateTimeField(auto_now=True, help_text='Updated at datetime')
     workspace = models.OneToOneField(Workspace, on_delete=models.PROTECT, help_text='Reference to Workspace model')
 
     class Meta:
@@ -180,6 +185,7 @@ class ExpenseAttribute(models.Model):
             ]
 
             if attributes_to_be_updated:
+                logger.info(f"Updating {len(attributes_to_be_updated)} {attribute_type} in Workspace {workspace_id}")
                 ExpenseAttribute.objects.bulk_update(
                     attributes_to_be_updated, fields=['active', 'updated_at'], batch_size=50)
 
@@ -190,7 +196,8 @@ class ExpenseAttribute(models.Model):
                 attribute_type=attribute_type, workspace_id=workspace_id, active=True
             ).exclude(source_id__in=expense_attributes_deletion_cache.category_ids)
             expense_attributes_deletion_cache.category_ids = []
-            expense_attributes_deletion_cache.save()
+            expense_attributes_deletion_cache.updated_at = datetime.now(timezone.utc)
+            expense_attributes_deletion_cache.save(update_fields=['category_ids', 'updated_at'])
             disable_attributes(deleted_attributes)
 
         elif attribute_type == 'PROJECT':
@@ -198,7 +205,8 @@ class ExpenseAttribute(models.Model):
                 attribute_type=attribute_type, workspace_id=workspace_id, active=True
             ).exclude(source_id__in=expense_attributes_deletion_cache.project_ids)
             expense_attributes_deletion_cache.project_ids = []
-            expense_attributes_deletion_cache.save()
+            expense_attributes_deletion_cache.updated_at = datetime.now(timezone.utc)
+            expense_attributes_deletion_cache.save(update_fields=['project_ids', 'updated_at'])
             disable_attributes(deleted_attributes)
 
         elif attribute_type == 'COST_CENTER':
@@ -206,7 +214,8 @@ class ExpenseAttribute(models.Model):
                 attribute_type=attribute_type, workspace_id=workspace_id, active=True
             ).exclude(source_id__in=expense_attributes_deletion_cache.cost_center_ids)
             expense_attributes_deletion_cache.cost_center_ids = []
-            expense_attributes_deletion_cache.save()
+            expense_attributes_deletion_cache.updated_at = datetime.now(timezone.utc)
+            expense_attributes_deletion_cache.save(update_fields=['cost_center_ids', 'updated_at'])
             disable_attributes(deleted_attributes)
 
         elif attribute_type == 'MERCHANT':
@@ -214,7 +223,8 @@ class ExpenseAttribute(models.Model):
                 attribute_type=attribute_type, workspace_id=workspace_id, active=True
             ).exclude(value__in=expense_attributes_deletion_cache.merchant_list)
             expense_attributes_deletion_cache.merchant_list = []
-            expense_attributes_deletion_cache.save()
+            expense_attributes_deletion_cache.updated_at = datetime.now(timezone.utc)
+            expense_attributes_deletion_cache.save(update_fields=['merchant_list', 'updated_at'])
             disable_attributes(deleted_attributes)
 
         else:
@@ -227,7 +237,8 @@ class ExpenseAttribute(models.Model):
                 disable_attributes(deleted_attributes)
 
             expense_attributes_deletion_cache.custom_field_list = []
-            expense_attributes_deletion_cache.save()
+            expense_attributes_deletion_cache.updated_at = datetime.now(timezone.utc)
+            expense_attributes_deletion_cache.save(update_fields=['custom_field_list', 'updated_at'])
 
     @staticmethod
     def bulk_create_or_update_expense_attributes(
