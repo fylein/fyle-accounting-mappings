@@ -411,7 +411,8 @@ class DestinationAttribute(models.Model):
                 display_name=display_name,
                 attribute_disable_callback_path=attribute_disable_callback_path,
                 is_import_to_fyle_enabled=is_import_to_fyle_enabled,
-                skip_deletion=skip_deletion
+                skip_deletion=skip_deletion,
+                app_name=app_name
             )
         else:
             DestinationAttribute.bulk_create_or_update_destination_attributes_without_delete_case(
@@ -434,6 +435,7 @@ class DestinationAttribute(models.Model):
         attribute_disable_callback_path: str = None,
         is_import_to_fyle_enabled: bool = False,
         skip_deletion: bool = False,
+        app_name: str = None
     ):
         is_custom_source_field = MappingSetting.objects.filter(
             workspace_id=workspace_id,
@@ -480,6 +482,7 @@ class DestinationAttribute(models.Model):
         for attribute in attributes:
             destination_id = attribute['destination_id']
             value = attribute['value']
+            code = " ".join(attribute['code'].split()) if attribute.get('code') else None
 
             # If destination_id is new, create
             if destination_id not in destination_id_to_existing and destination_id not in processed_destination_ids:
@@ -509,7 +512,7 @@ class DestinationAttribute(models.Model):
                             )
                         )
                     # Case where the attribute_type is ACCOUNT, the detail_type is different and value is same.
-                    elif not skip_deletion and attribute_type == 'ACCOUNT':
+                    elif not skip_deletion and attribute_type == 'ACCOUNT' and code and app_name == 'QUICKBOOKS':
                         attributes_to_be_created.append(
                             DestinationAttribute(
                                 attribute_type=attribute_type,
