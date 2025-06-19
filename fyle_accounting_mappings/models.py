@@ -508,6 +508,20 @@ class DestinationAttribute(models.Model):
                                 updated_at=datetime.now()
                             )
                         )
+                    # Case where the attribute_type is ACCOUNT, the detail_type is different and value is same.
+                    elif not skip_deletion and attribute_type == 'ACCOUNT':
+                        attributes_to_be_created.append(
+                            DestinationAttribute(
+                                attribute_type=attribute_type,
+                                display_name=attribute['display_name'],
+                                value=value,
+                                destination_id=destination_id,
+                                detail=attribute.get('detail'),
+                                workspace_id=workspace_id,
+                                active=attribute.get('active'),
+                                code=" ".join(attribute['code'].split()) if attribute.get('code') else None
+                            )
+                        )
                 else:
                     # New attribute to be created
                     attributes_to_be_created.append(
