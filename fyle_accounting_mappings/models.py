@@ -487,7 +487,10 @@ class DestinationAttribute(models.Model):
                 if value in value_to_existing:
                     existing_row = value_to_existing[value]
 
-                    if not (skip_deletion or (attribute_type == 'ACCOUNT' and (existing_row.get('detail') or {}).get('account_type') != (attribute.get('detail') or {}).get('account_type'))):
+                    if not (skip_deletion or (attribute_type == 'ACCOUNT' and (
+                        (existing_row.get('detail') or {}).get('account_type') != (attribute.get('detail') or {}).get('account_type')
+                        or (existing_row.get('detail') or {}).get('detail_type') != (attribute.get('detail') or {}).get('detail_type')
+                    ))):
                         attributes_to_disable[existing_row['destination_id']] = {
                             'value': existing_row['value'],
                             'updated_value': value,
