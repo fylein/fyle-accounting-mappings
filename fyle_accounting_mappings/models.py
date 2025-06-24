@@ -490,6 +490,9 @@ class DestinationAttribute(models.Model):
                 if value in value_to_existing:
                     existing_row = value_to_existing[value]
 
+                    if not attribute['active']:
+                        continue
+
                     if not (skip_deletion or (attribute_type == 'ACCOUNT' and (
                         (existing_row.get('detail') or {}).get('account_type') != (attribute.get('detail') or {}).get('account_type')
                         or (existing_row.get('detail') or {}).get('detail_type') != (attribute.get('detail') or {}).get('detail_type')
