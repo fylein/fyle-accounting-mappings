@@ -9,7 +9,7 @@ from .models import FailedEvent
 logger = logging.getLogger(__name__)
 
 
-class TaskChainExecutor:
+class TaskChainRunner:
     """
     Helper class for executing a chain of tasks
     """
