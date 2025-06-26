@@ -487,7 +487,7 @@ class DestinationAttribute(models.Model):
             # If destination_id is new, create
             if destination_id not in destination_id_to_existing and destination_id not in processed_destination_ids:
                 # Check if the value already exists with a different destination_id → update the existing one
-                if value in value_to_existing:
+                if value in value_to_existing and not skip_deletion:
                     existing_row = value_to_existing[value]
 
                     if not attribute['active']:
