@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from django.core.management import call_command
 from django.utils.module_loading import import_string
 
 from .data_class import Task
@@ -32,3 +33,15 @@ class TaskChainRunner:
                     workspace_id=workspace_id,
                     error_traceback=str(e)
                 )
+
+
+def create_cache_table():
+    """
+    Create cache table
+    """
+    try:
+        logger.info('Creating cache table if it does not exist...')
+        call_command('createcachetable', database='cache_db', verbosity=0)
+        logger.info('Cache table creation completed successfully')
+    except Exception as e:
+        logger.error('Error creating cache table: %s', str(e))
