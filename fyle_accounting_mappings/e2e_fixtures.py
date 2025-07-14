@@ -9,47 +9,53 @@ from .models import (
 class BaseFixtureFactory:
     """Base factory for creating test fixture data, common to all integrations."""
 
-    def create_expense_attributes(self, workspace, count=5):
+    def create_expense_attributes(self, workspace, count=11):
         """Create sample expense attributes"""
-        attributes = []
         attribute_types = ['CATEGORY', 'PROJECT', 'COST_CENTER', 'EMPLOYEE', 'VENDOR']
 
-        for i, attr_type in enumerate(attribute_types[:count]):
-            attr = ExpenseAttribute.objects.create(
-                workspace=workspace,
-                attribute_type=attr_type,
-                display_name=f'E2E {attr_type.title()}',
-                value=f'e2e-{attr_type.lower()}-{i}',
-                source_id=f'src_{i}',
-                detail={'description': f'E2E test {attr_type.lower()}'},
-                created_at=timezone.now(),
-                updated_at=timezone.now()
-            )
-            attributes.append(attr)
+        attrs_to_create = []
+        for i, attr_type in enumerate(attribute_types):
+            for j in range(count):
+                attr = ExpenseAttribute(
+                    workspace=workspace,
+                    attribute_type=attr_type,
+                    value=f'E2E {attr_type.title()} {j + 1}',
+                    display_name=attr_type.replace('_', ' ').title(),
+                    source_id=f'src_{i * count + j + 1}',
+                    detail={'description': f'E2E test {attr_type.lower()}'},
+                    active=True,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now()
+                )
+                attrs_to_create.append(attr)
 
-        return attributes
+        created_attrs = ExpenseAttribute.objects.bulk_create(attrs_to_create)
+        return created_attrs
 
-    def create_destination_attributes(self, workspace, count=5):
+    def create_destination_attributes(self, workspace, count=11):
         """Create sample destination attributes"""
-        attributes = []
         attribute_types = [
             'ACCOUNT', 'VENDOR', 'EMPLOYEE', 'LOCATION', 'DEPARTMENT'
         ]
 
-        for i, attr_type in enumerate(attribute_types[:count]):
-            attr = DestinationAttribute.objects.create(
-                workspace=workspace,
-                attribute_type=attr_type,
-                display_name=f'E2E {attr_type.title()} {i+1}',
-                value=f'e2e-{attr_type.lower()}-{i+1}',
-                destination_id=f'dst_{i+1}',
-                detail={'code': f'E2E{i+1}'},
-                created_at=timezone.now(),
-                updated_at=timezone.now()
-            )
-            attributes.append(attr)
+        attrs_to_create = []
+        for i, attr_type in enumerate(attribute_types):
+            for j in range(count):
+                attr = DestinationAttribute(
+                    workspace=workspace,
+                    attribute_type=attr_type,
+                    value=f'E2E {attr_type.title()} {j + 1}',
+                    display_name=attr_type.replace('_', ' ').lower(),
+                    destination_id=f'dst_{i * count + j + 1}',
+                    detail={'code': f'E2E{i * count + j + 1}'},
+                    active=True,
+                    created_at=timezone.now(),
+                    updated_at=timezone.now()
+                )
+                attrs_to_create.append(attr)
 
-        return attributes
+        created_attrs = DestinationAttribute.objects.bulk_create(attrs_to_create)
+        return created_attrs
 
     def create_mapping_settings(self, workspace, count=3):
         """Create sample mapping settings"""
