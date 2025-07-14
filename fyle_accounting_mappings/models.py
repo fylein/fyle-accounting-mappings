@@ -725,7 +725,12 @@ class DestinationAttribute(models.Model):
                     )
 
         if attribute_disable_callback_path and attributes_to_disable:
-            import_string(attribute_disable_callback_path)(workspace_id, attributes_to_disable, is_import_to_fyle_enabled)
+            import_string(attribute_disable_callback_path)(
+                workspace_id=workspace_id,
+                attributes_to_disable=attributes_to_disable,
+                is_import_to_fyle_enabled=is_import_to_fyle_enabled,
+                attribute_type=attribute_type
+            )
 
         if attributes_to_be_created:
             DestinationAttribute.objects.bulk_create(attributes_to_be_created, batch_size=50)
