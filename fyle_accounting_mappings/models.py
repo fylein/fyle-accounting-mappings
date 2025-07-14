@@ -402,28 +402,28 @@ class DestinationAttribute(models.Model):
                         Attributes such as COST_CODE have duplicate values belonging to different projects,
                         we would skip the deletion of these attributes
         """
-        if app_name and app_name in ['Sage 300', 'QBD_CONNECTOR', 'NETSUITE', 'XERO', 'QUICKBOOKS', 'INTACCT']:
-            DestinationAttribute.bulk_create_or_update_destination_attributes_with_delete_case(
-                attributes=attributes,
-                attribute_type=attribute_type,
-                workspace_id=workspace_id,
-                update=update,
-                display_name=display_name,
-                attribute_disable_callback_path=attribute_disable_callback_path,
-                is_import_to_fyle_enabled=is_import_to_fyle_enabled,
-                skip_deletion=skip_deletion,
-                app_name=app_name
-            )
-        else:
-            DestinationAttribute.bulk_create_or_update_destination_attributes_without_delete_case(
-                attributes=attributes,
-                attribute_type=attribute_type,
-                workspace_id=workspace_id,
-                update=update,
-                display_name=display_name,
-                attribute_disable_callback_path=attribute_disable_callback_path,
-                is_import_to_fyle_enabled=is_import_to_fyle_enabled
-            )
+        # if app_name and app_name in ['Sage 300', 'QBD_CONNECTOR', 'NETSUITE', 'XERO', 'QUICKBOOKS', 'INTACCT']:
+        #     DestinationAttribute.bulk_create_or_update_destination_attributes_with_delete_case(
+        #         attributes=attributes,
+        #         attribute_type=attribute_type,
+        #         workspace_id=workspace_id,
+        #         update=update,
+        #         display_name=display_name,
+        #         attribute_disable_callback_path=attribute_disable_callback_path,
+        #         is_import_to_fyle_enabled=is_import_to_fyle_enabled,
+        #         skip_deletion=skip_deletion,
+        #         app_name=app_name
+        #     )
+        # else:
+        DestinationAttribute.bulk_create_or_update_destination_attributes_without_delete_case(
+            attributes=attributes,
+            attribute_type=attribute_type,
+            workspace_id=workspace_id,
+            update=update,
+            display_name=display_name,
+            attribute_disable_callback_path=attribute_disable_callback_path,
+            is_import_to_fyle_enabled=is_import_to_fyle_enabled
+        )
 
     @staticmethod
     def bulk_create_or_update_destination_attributes_with_delete_case(
@@ -582,7 +582,12 @@ class DestinationAttribute(models.Model):
 
         # Call disable callback if applicable
         if attribute_disable_callback_path and attributes_to_disable:
-            import_string(attribute_disable_callback_path)(workspace_id, attributes_to_disable, is_import_to_fyle_enabled)
+            import_string(attribute_disable_callback_path)(
+                workspace_id=workspace_id,
+                attributes_to_disable=attributes_to_disable,
+                is_import_to_fyle_enabled=is_import_to_fyle_enabled,
+                attribute_type=attribute_type
+            )
 
         # Bulk create new attributes
         if attributes_to_be_created:
@@ -634,6 +639,12 @@ class DestinationAttribute(models.Model):
         - attribute_disable_callback_path: Optional dotted path to callback function
         - is_import_to_fyle_enabled: Whether Fyle import is enabled
         """
+        is_custom_source_field = MappingSetting.objects.filter(
+            workspace_id=workspace_id,
+            destination_field=attribute_type,
+            is_custom=True
+        ).exists()
+
         unique_attributes = {attribute['destination_id']: attribute for attribute in attributes}
         attributes = list(unique_attributes.values())
         attribute_destination_id_list = list(unique_attributes.keys())
@@ -723,7 +734,12 @@ class DestinationAttribute(models.Model):
             DestinationAttribute.objects.bulk_update(
                 attributes_to_be_updated, fields=['detail', 'value', 'active', 'updated_at', 'code'], batch_size=50)
 
-
+        if is_custom_source_field and attributes_to_disable:
+            import_string('fyle_integrations_imports.modules.expense_custom_fields.disable_expense_custom_fields')(
+                workspace_id=workspace_id,
+                attribute_type=attribute_type,
+                attributes_to_disable=attributes_to_disable
+            )
 
 
 class ExpenseField(models.Model):
