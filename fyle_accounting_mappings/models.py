@@ -4,8 +4,9 @@ from typing import List, Dict
 from datetime import datetime, timezone
 from django.utils.module_loading import import_string
 from django.db import models, transaction
-from django.db.models import Q, JSONField
+from django.db.models import Q, JSONField, F
 from django.contrib.postgres.fields import ArrayField
+from django.db.models.fields.json import KeyTextTransform
 
 from .exceptions import BulkError
 from .utils import assert_valid
@@ -1175,10 +1176,50 @@ class CategoryMapping(models.Model):
         Create Category Mappings for CCC Expenses
         :param workspace_id: Workspace ID
         """
-        category_mappings = CategoryMapping.objects.filter(
-            workspace_id=workspace_id,
-            destination_account__isnull=True
-        ).all()
+        """
+        select
+            cm.id as category_mapping_pk,
+            da.id as destination_expense_head_id,
+            cm.destination_account_id as destination_account_id,
+            acc.destination_id as destination_account_destination_id,
+            da.detail->>'gl_account_no' as destination_expense_head_detail_gl_account_no,
+            da.detail->>'account_internal_id' as destination_expense_head_detail_account_internal_id
+        from category_mappings cm
+        join destination_attributes da
+            on da.id = cm.destination_expense_head_id
+            and da.workspace_id = cm.workspace_id
+        left join destination_attributes acc
+            on acc.id = cm.destination_account_id
+            and acc.workspace_id = cm.workspace_id
+        where cm.workspace_id = 1
+        and (
+            cm.destination_account_id is null
+            or (
+            da.detail->>'gl_account_no' is not null
+            and acc.destination_id is distinct from da.detail->>'gl_account_no'
+            )
+            OR (
+            da.detail->>'account_internal_id' is not null
+            and acc.destination_id is distinct from da.detail->>'account_internal_id'
+            )
+        );
+
+        We check if the destination_account_id is null or the destination_account_destination_id is not same as the destination_expense_head_detail_gl_account_no or destination_expense_head_detail_account_internal_id
+        """
+        category_mappings = CategoryMapping.objects.select_related('destination_expense_head', 'destination_account').annotate(
+            gl_account_no_text=KeyTextTransform('gl_account_no', 'destination_expense_head__detail'),
+            account_internal_id_text=KeyTextTransform('account_internal_id', 'destination_expense_head__detail')
+        ).filter(
+            workspace_id=workspace_id
+        ).filter(
+            Q(destination_account__isnull=True) |
+            (
+                Q(gl_account_no_text__isnull=False) & ~Q(destination_account__destination_id=F('gl_account_no_text'))
+            ) |
+            (
+                Q(account_internal_id_text__isnull=False) & ~Q(destination_account__destination_id=F('account_internal_id_text'))
+            )
+        )
 
         destination_account_internal_ids = []
 
