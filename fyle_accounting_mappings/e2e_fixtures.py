@@ -11,7 +11,7 @@ class BaseFixtureFactory:
 
     def create_expense_attributes(self, workspace, count=11):
         """Create sample expense attributes"""
-        attribute_types = ['CATEGORY', 'PROJECT', 'COST_CENTER', 'EMPLOYEE', 'VENDOR']
+        attribute_types = ['CATEGORY', 'PROJECT', 'COST_CENTER', 'EMPLOYEE', 'VENDOR', 'CORPORATE_CARD']
 
         attrs_to_create = []
         for i, attr_type in enumerate(attribute_types):
@@ -19,7 +19,7 @@ class BaseFixtureFactory:
                 attr = ExpenseAttribute(
                     workspace=workspace,
                     attribute_type=attr_type,
-                    value=f'E2E {attr_type.title()} {j + 1}',
+                    value=f"E2E {attr_type.replace('_', ' ').title()} {j + 1}",
                     display_name=attr_type.replace('_', ' ').title(),
                     source_id=f'src_{i * count + j + 1}',
                     detail={'description': f'E2E test {attr_type.lower()}'},
@@ -35,7 +35,7 @@ class BaseFixtureFactory:
     def create_destination_attributes(self, workspace, count=11):
         """Create sample destination attributes"""
         attribute_types = [
-            'ACCOUNT', 'VENDOR', 'EMPLOYEE', 'LOCATION', 'DEPARTMENT'
+            'ACCOUNT', 'VENDOR', 'EMPLOYEE', 'LOCATION', 'DEPARTMENT', 'CHARGE_CARD_NUMBER'
         ]
 
         attrs_to_create = []
@@ -44,7 +44,7 @@ class BaseFixtureFactory:
                 attr = DestinationAttribute(
                     workspace=workspace,
                     attribute_type=attr_type,
-                    value=f'E2E {attr_type.title()} {j + 1}',
+                    value=f"E2E {attr_type.replace('_', ' ').title()} {j + 1}",
                     display_name=attr_type.replace('_', ' ').lower(),
                     destination_id=f'dst_{i * count + j + 1}',
                     detail={'code': f'E2E{i * count + j + 1}'},
