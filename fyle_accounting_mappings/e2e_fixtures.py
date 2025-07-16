@@ -67,7 +67,6 @@ class BaseFixtureFactory:
                 workspace=workspace,
                 source_field=setting_type,
                 destination_field='VENDOR' if setting_type == 'EMPLOYEE' else 'ACCOUNT',
-                import_to_fyle=True,
                 is_custom=False,
                 created_at=timezone.now(),
                 updated_at=timezone.now()
