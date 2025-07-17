@@ -705,7 +705,7 @@ class DestinationAttribute(models.Model):
                         'value': primary_key_map[attribute['destination_id']]['value'],
                         'updated_value': attribute['value'],
                         'code': primary_key_map[attribute['destination_id']]['code'],
-                        'updated_code': attribute['code']
+                        'updated_code': " ".join(attribute['code'].split()) if 'code' in attribute and attribute['code'] else None
                     }
 
                 if update and (
