@@ -29,6 +29,7 @@ class BaseFixtureFactory:
                 )
                 attrs_to_create.append(attr)
 
+        ExpenseAttribute.objects.filter(workspace=workspace).update(active=False)
         created_attrs = ExpenseAttribute.objects.bulk_create(attrs_to_create)
         return created_attrs
 
