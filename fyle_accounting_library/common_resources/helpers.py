@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 
 
@@ -12,3 +13,11 @@ def get_values_from_enums(enum: Enum) -> list:
     :return: Values
     """
     return [e.value for e in enum]
+
+
+def get_current_utc_datetime() -> datetime:
+    """
+    Get current UTC datetime
+    :return: Current UTC datetime
+    """
+    return datetime.now(datetime.timezone.utc)
