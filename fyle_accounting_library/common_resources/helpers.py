@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 
@@ -20,4 +20,4 @@ def get_current_utc_datetime() -> datetime:
     Get current UTC datetime
     :return: Current UTC datetime
     """
-    return datetime.now(datetime.timezone.utc)
+    return datetime.now(timezone.utc)
