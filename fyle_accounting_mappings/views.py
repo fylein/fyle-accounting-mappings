@@ -201,7 +201,7 @@ class MappingStatsView(ListCreateAPIView):
             'workspace_id': self.kwargs['workspace_id']
         }
 
-        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct']:
+        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage File Export']:
             filters['active'] = True
 
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
