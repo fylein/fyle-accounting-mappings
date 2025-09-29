@@ -111,7 +111,6 @@ def assert_valid_callback_request(workspace_id: int, org_id: str) -> None:
         raise ValidationError('Workspace id does not match with the org id in the request')
 
 
-
 def construct_expense_filter_query(expense_filters: list[models.Model]) -> Q:
     """
     Construct expense filter query
@@ -161,7 +160,7 @@ def construct_expense_filter(expense_filter: models.Model) -> Q:
 
                 filter1 = {
                     f'custom_properties__{expense_filter.condition}__{expense_filter.operator}':
-                        expense_filter.values[0] if len(expense_filter.values) == OperatorEnum.ONE.value and expense_filter.operator != OperatorEnum.IN.value
+                        expense_filter.values[0] if len(expense_filter.values) == ExpenseFilterRankEnum.ONE.value and expense_filter.operator != OperatorEnum.IN.value
                         else expense_filter.values
                 }
                 constructed_expense_filter = Q(**filter1)
@@ -188,7 +187,7 @@ def construct_expense_filter(expense_filter: models.Model) -> Q:
     else:
         filter1 = {
             f'{expense_filter.condition}__{expense_filter.operator}':
-                expense_filter.values[0] if len(expense_filter.values) == OperatorEnum.ONE.value and expense_filter.operator != OperatorEnum.IN.value
+                expense_filter.values[0] if len(expense_filter.values) == ExpenseFilterRankEnum.ONE.value and expense_filter.operator != OperatorEnum.IN.value
                 else expense_filter.values
         }
         constructed_expense_filter = Q(**filter1)
