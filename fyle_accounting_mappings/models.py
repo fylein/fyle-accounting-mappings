@@ -1272,3 +1272,40 @@ class CategoryMapping(models.Model):
             CategoryMapping.objects.bulk_update(
                 mapping_updation_batch, fields=['destination_account'], batch_size=50
             )
+
+
+class FyleSyncTimestamp(models.Model):
+    """
+    Table to store fyle attributes sync timestamps
+    """
+    id = models.AutoField(primary_key=True)
+    workspace = models.ForeignKey(
+        Workspace,
+        on_delete=models.PROTECT,
+        help_text='Reference to workspace'
+    )
+    category_synced_at = models.DateTimeField(help_text='Datetime when category were synced last', null=True)
+    project_synced_at = models.DateTimeField(help_text='Datetime when project were synced last', null=True)
+    cost_center_synced_at = models.DateTimeField(help_text='Datetime when cost_center were synced last', null=True)
+    employee_synced_at = models.DateTimeField(help_text='Datetime when employees were synced last', null=True)
+    expense_fields_synced_at = models.DateTimeField(help_text='Datetime when expense fields were synced last', null=True)
+    corporate_cards_synced_at = models.DateTimeField(help_text='Datetime when corporate cards were synced last', null=True)
+    dependent_fields_synced_at = models.DateTimeField(help_text='Datetime when dependent fields were synced last', null=True)
+    tax_group_fields_synced_at = models.DateTimeField(help_text='Datetime when tax groups were synced last', null=True)
+    created_at = models.DateTimeField(auto_now_add=True, help_text='Created at datetime')
+    updated_at = models.DateTimeField(auto_now=True, help_text='Updated at datetime')
+
+    class Meta:
+        db_table = 'fyle_sync_timestamps'
+
+    @staticmethod
+    def update_sync_timestamp(workspace_id: int, entity_type: str):
+        """
+        Update sync timestamp
+        :param workspace_id: workspace id
+        :param entity_type: entity type
+        :return: sync timestamp
+        """
+        fyle_sync_timestamp = FyleSyncTimestamp.objects.get(workspace_id=workspace_id)
+        setattr(fyle_sync_timestamp, f'{entity_type}_synced_at', datetime.now())
+        fyle_sync_timestamp.save(update_fields=[f'{entity_type}_synced_at', 'updated_at'])
