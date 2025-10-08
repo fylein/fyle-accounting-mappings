@@ -219,6 +219,42 @@ class ExpenseAccountTypeEnum(str, Enum):
     CCC = 'PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT'
 
 
+class WebhookAttributeActionEnum(str, Enum):
+    """Enum for webhook actions"""
+    CREATED = 'CREATED'
+    UPDATED = 'UPDATED'
+    DELETED = 'DELETED'
+
+
+class ImportLogStatusEnum(str, Enum):
+    """Enum for import log status"""
+    SUCCESS = 'SUCCESS'
+    FAILED = 'FAILED'
+    IN_PROGRESS = 'IN_PROGRESS'
+    FATAL = 'FATAL'
+
+
+class FyleAttributeTypeEnum(str, Enum):
+    """Enum for attribute types"""
+    CATEGORY = 'CATEGORY'
+    PROJECT = 'PROJECT'
+    COST_CENTER = 'COST_CENTER'
+    EMPLOYEE = 'EMPLOYEE'
+    CORPORATE_CARD = 'CORPORATE_CARD'
+    TAX_GROUP = 'TAX_GROUP'
+    EXPENSE_FIELD = 'EXPENSE_FIELD'
+    DEPENDENT_FIELD = 'DEPENDENT_FIELD'
+    ORG_SETTING = 'ORG_SETTING'
+
+
+class CacheKeyEnum(str, Enum):
+    """
+    Cache key enum
+    """
+    IMPORT_PROGRESS = "import_progress_{workspace_id}_{attribute_type}"
+    WORKSPACE_VALIDATION = 'workspace_validation_{workspace_id}_{fyle_org_id}'
+
+
 class DefaultExpenseAttributeDetailEnum(Enum):
     """
     Enum for Default Expense Attribute Detail
