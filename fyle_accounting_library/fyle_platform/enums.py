@@ -228,7 +228,7 @@ class WebhookAttributeActionEnum(str, Enum):
 
 class ImportLogStatusEnum(str, Enum):
     """Enum for import log status"""
-    SUCCESS = 'SUCCESS'
+    COMPLETE = 'COMPLETE'
     FAILED = 'FAILED'
     IN_PROGRESS = 'IN_PROGRESS'
     FATAL = 'FATAL'
