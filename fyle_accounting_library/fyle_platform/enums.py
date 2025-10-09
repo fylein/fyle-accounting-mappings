@@ -251,8 +251,8 @@ class CacheKeyEnum(str, Enum):
     """
     Cache key enum
     """
-    IMPORT_PROGRESS = "import_progress_{workspace_id}_{attribute_type}"
-    WORKSPACE_VALIDATION = 'workspace_validation_{workspace_id}_{fyle_org_id}'
+    IMPORT_LOG_IN_PROGRESS = "import_log_in_progress:{workspace_id}:{attribute_type}"
+    WORKSPACE_VALIDATION = 'workspace_ids_map:{workspace_id}:{fyle_org_id}'
 
 
 class DefaultExpenseAttributeDetailEnum(Enum):
