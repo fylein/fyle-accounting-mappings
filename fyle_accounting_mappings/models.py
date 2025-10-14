@@ -1,7 +1,7 @@
 import importlib
 import logging
 from typing import List, Dict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from django.utils.module_loading import import_string
 from django.db import models, transaction
 from django.db.models import Q, JSONField, F
@@ -1307,5 +1307,5 @@ class FyleSyncTimestamp(models.Model):
         :return: sync timestamp
         """
         fyle_sync_timestamp = FyleSyncTimestamp.objects.get(workspace_id=workspace_id)
-        setattr(fyle_sync_timestamp, f'{entity_type}_synced_at', datetime.now())
+        setattr(fyle_sync_timestamp, f'{entity_type}_synced_at', datetime.now()-timedelta(hours=2))
         fyle_sync_timestamp.save(update_fields=[f'{entity_type}_synced_at', 'updated_at'])
