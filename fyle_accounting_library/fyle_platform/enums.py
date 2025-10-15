@@ -253,7 +253,9 @@ class CacheKeyEnum(str, Enum):
     """
     IMPORT_LOG_IN_PROGRESS = "import_log_in_progress:{workspace_id}:{attribute_type}"
     WORKSPACE_VALIDATION = 'workspace_ids_map:{workspace_id}:{fyle_org_id}'
-    FEATURE_CONFIG = 'feature_config_{workspace_id}'
+    FEATURE_CONFIG_EXPORT_VIA_RABBITMQ = 'feature_config:export_via_rabbitmq:{workspace_id}'
+    FEATURE_CONFIG_IMPORT_VIA_RABBITMQ = 'feature_config:import_via_rabbitmq:{workspace_id}'
+    FEATURE_CONFIG_FYLE_WEBHOOK_SYNC_ENABLED = 'feature_config:fyle_webhook_sync_enabled:{workspace_id}'
 
 
 class DefaultExpenseAttributeDetailEnum(Enum):
