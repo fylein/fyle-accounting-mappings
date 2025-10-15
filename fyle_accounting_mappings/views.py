@@ -201,7 +201,7 @@ class MappingStatsView(ListCreateAPIView):
             'workspace_id': self.kwargs['workspace_id']
         }
 
-        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage File Export']:
+        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 Accounting (US)']:
             filters['active'] = True
 
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
@@ -245,7 +245,7 @@ class MappingStatsView(ListCreateAPIView):
                 filters.pop('destination_type')
                 filters['destination_type__in'] = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
 
-            if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct']:
+            if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 Accounting (US)']:
                 filters['source__active'] = True
 
             mapped_attributes_count = Mapping.objects.filter(**filters).count()
@@ -314,7 +314,7 @@ class ExpenseAttributesMappingView(ListAPIView):
         # Prepare filters for the ExpenseAttribute
         base_filters = Q(workspace_id=self.kwargs['workspace_id']) & Q(attribute_type=source_type)
 
-        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct']:
+        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 Accounting (US)']:
             base_filters &= Q(active=True)
 
         # Handle Activity attribute if attribute mapping is present then show mappings else don't return Activity attribute
@@ -509,3 +509,36 @@ class PaginatedDestinationAttributesView(LookupFieldMixin, ListAPIView):
     serializer_class = DestinationAttributeSerializer
     filter_backends = (DjangoFilterBackend, JSONFieldFilterBackend,)
     filterset_class = DestinationAttributeFilter
+
+
+class DestinationAttributesStatsView(LookupFieldMixin, ListAPIView):
+    """
+    Destination Attributes Stats view
+    """
+    def get(self, request, *args, **kwargs):
+        attribute_type = self.request.query_params.get('attribute_type')
+        display_name = self.request.query_params.get('display_name', None)
+        assert_valid(attribute_type is not None, 'query param attribute_type not found')
+
+        filters = {
+            'attribute_type': attribute_type,
+            'workspace_id': self.kwargs['workspace_id']
+        }
+
+        if display_name:
+            filters['display_name'] = display_name
+
+        query = DestinationAttribute.objects.filter(**filters)
+
+        total_attributes_count = query.count()
+        active_attributes_count = query.filter(active=True).count()
+        inactive_attributes_count = total_attributes_count - active_attributes_count
+
+        return Response(
+            data={
+                'attributes_count': total_attributes_count,
+                'active_attributes_count': active_attributes_count,
+                'inactive_attributes_count': inactive_attributes_count
+            },
+            status=status.HTTP_200_OK
+        )

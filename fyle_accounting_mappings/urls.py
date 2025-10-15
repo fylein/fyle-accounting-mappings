@@ -28,7 +28,8 @@ from .views import (
     ExpenseFieldView,
     DestinationAttributesView,
     FyleFieldsView,
-    PaginatedDestinationAttributesView
+    PaginatedDestinationAttributesView,
+    DestinationAttributesStatsView
 )
 
 urlpatterns = [
@@ -46,4 +47,5 @@ urlpatterns = [
     path('destination_attributes/', DestinationAttributesView.as_view()),
     path('fyle_fields/', FyleFieldsView.as_view()),
     path('paginated_destination_attributes/', PaginatedDestinationAttributesView.as_view(), name='paginated_destination_attributes_view'),
+    path('destination_attributes_stats/', DestinationAttributesStatsView.as_view(), name='destination_attributes_stats_view'),
 ]
