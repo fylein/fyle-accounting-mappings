@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ExpenseImportSourceEnum:
     """
     Enum for Expense Import Source
@@ -200,8 +201,11 @@ class WebhookCallbackActionEnum(str, Enum):
     """
     Enum for Webhook Callback Action
     """
-    ACCOUNTING_EXPORT_INITIATED = 'ACCOUNTING_EXPORT_INITIATED'
+    CREATED = 'CREATED'
+    UPDATED = 'UPDATED'
+    DELETED = 'DELETED'
     UPDATED_AFTER_APPROVAL = 'UPDATED_AFTER_APPROVAL'
+    ACCOUNTING_EXPORT_INITIATED = 'ACCOUNTING_EXPORT_INITIATED'
 
 
 class WebhookCallbackResourceEnum(str, Enum):
@@ -209,6 +213,7 @@ class WebhookCallbackResourceEnum(str, Enum):
     Enum for Webhook Callback Resource
     """
     EXPENSE = 'EXPENSE'
+    ORG_SETTING = 'ORG_SETTING'
 
 
 class ExpenseAccountTypeEnum(str, Enum):
