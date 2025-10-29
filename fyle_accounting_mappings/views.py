@@ -201,7 +201,7 @@ class MappingStatsView(ListCreateAPIView):
             'workspace_id': self.kwargs['workspace_id']
         }
 
-        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 Accounting (US)']:
+        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 (US)']:
             filters['active'] = True
 
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
@@ -245,7 +245,7 @@ class MappingStatsView(ListCreateAPIView):
                 filters.pop('destination_type')
                 filters['destination_type__in'] = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
 
-            if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 Accounting (US)']:
+            if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 (US)']:
                 filters['source__active'] = True
 
             mapped_attributes_count = Mapping.objects.filter(**filters).count()
@@ -254,7 +254,7 @@ class MappingStatsView(ListCreateAPIView):
         if source_type == 'CATEGORY':
             activity_attribute_count = ExpenseAttribute.objects.filter(
                 attribute_type='CATEGORY', value='Activity', workspace_id=self.kwargs['workspace_id'], active=True).count()
-            
+
             if app_name in ('NetSuite', 'Sage Intacct', 'Sage 300 CRE', 'Dynamics 365 Business Central'):
                 activity_mapping = CategoryMapping.objects.filter(
                     source_category__value='Activity', workspace_id=self.kwargs['workspace_id']).first()
@@ -314,7 +314,7 @@ class ExpenseAttributesMappingView(ListAPIView):
         # Prepare filters for the ExpenseAttribute
         base_filters = Q(workspace_id=self.kwargs['workspace_id']) & Q(attribute_type=source_type)
 
-        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 Accounting (US)']:
+        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 (US)']:
             base_filters &= Q(active=True)
 
         # Handle Activity attribute if attribute mapping is present then show mappings else don't return Activity attribute
@@ -328,10 +328,10 @@ class ExpenseAttributesMappingView(ListAPIView):
             if activity_attribute and not activity_mapping:
                 base_filters &= ~Q(value='Activity')
 
-        
+
         if app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD':
             destination_type = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
-        
+
         # Handle the 'mapped' parameter
         param = None
         if mapped is True:
