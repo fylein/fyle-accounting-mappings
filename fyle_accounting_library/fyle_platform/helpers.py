@@ -5,6 +5,7 @@ from typing import List, Any
 
 from django.db import models
 from django.db.models import Q
+from django.core.cache import cache
 from rest_framework.exceptions import ValidationError
 
 workspace_models = importlib.import_module("apps.workspaces.models")
@@ -16,7 +17,8 @@ from .enums import (
     ExpenseFilterRankEnum,
     SourceAccountTypeEnum,
     ExpenseFilterJoinByEnum,
-    ExpenseFilterConditionEnum as OperatorEnum
+    ExpenseFilterConditionEnum as OperatorEnum,
+    CacheKeyEnum
 )
 from .constants import REIMBURSABLE_IMPORT_STATE, CCC_IMPORT_STATE
 from .models import ExpenseGroupSettingsAdapter
@@ -101,14 +103,22 @@ def get_fund_source_based_on_export_modules(reimbursable_export_module: str, ccc
 
 def assert_valid_callback_request(workspace_id: int, org_id: str) -> None:
     """
-    Assert if the callback request is valid
+    Assert if the callback request is valid with caching
     :param workspace_id: workspace id
     :param org_id: org id
     :return: None
     """
+    cache_key = CacheKeyEnum.WORKSPACE_VALIDATION.value.format(workspace_id=workspace_id, fyle_org_id=org_id)
+
+    cached_result = cache.get(cache_key)
+    if cached_result:
+        return
+
     workspace = Workspace.objects.get(org_id=org_id)
     if workspace.id != workspace_id:
         raise ValidationError('Workspace id does not match with the org id in the request')
+    
+    cache.set(cache_key, True, 2592000)
 
 
 def construct_expense_filter_query(expense_filters: list[models.Model]) -> Q:
