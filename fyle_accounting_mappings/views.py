@@ -198,11 +198,9 @@ class MappingStatsView(ListCreateAPIView):
 
         filters = {
             'attribute_type': source_type,
-            'workspace_id': self.kwargs['workspace_id']
+            'workspace_id': self.kwargs['workspace_id'],
+            'active': True
         }
-
-        if source_type in ('PROJECT', 'CATEGORY', 'EMPLOYEE') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 (US)']:
-            filters['active'] = True
 
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
 
@@ -239,14 +237,12 @@ class MappingStatsView(ListCreateAPIView):
             filters = {
                 'source_type': source_type,
                 'destination_type': destination_type,
-                'workspace_id': self.kwargs['workspace_id']
+                'workspace_id': self.kwargs['workspace_id'],
+                'source__active': True
             }
             if app_name == 'QuickBooks Online' and source_type == 'CORPORATE_CARD':
                 filters.pop('destination_type')
                 filters['destination_type__in'] = ['CREDIT_CARD_ACCOUNT', 'BANK_ACCOUNT']
-
-            if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 (US)']:
-                filters['source__active'] = True
 
             mapped_attributes_count = Mapping.objects.filter(**filters).count()
             activity_mapping = None
@@ -312,10 +308,7 @@ class ExpenseAttributesMappingView(ListAPIView):
             mapped = None
 
         # Prepare filters for the ExpenseAttribute
-        base_filters = Q(workspace_id=self.kwargs['workspace_id']) & Q(attribute_type=source_type)
-
-        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'NetSuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 (US)']:
-            base_filters &= Q(active=True)
+        base_filters = Q(workspace_id=self.kwargs['workspace_id']) & Q(attribute_type=source_type) & Q(active=True)
 
         # Handle Activity attribute if attribute mapping is present then show mappings else don't return Activity attribute
         if source_type == 'CATEGORY':
