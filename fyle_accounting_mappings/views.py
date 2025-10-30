@@ -201,13 +201,13 @@ class MappingStatsView(ListCreateAPIView):
             'workspace_id': self.kwargs['workspace_id']
         }
 
-        if source_type in ('PROJECT', 'CATEGORY') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 (US)']:
+        if source_type in ('PROJECT', 'CATEGORY', 'EMPLOYEE') or app_name in ['Sage 300 CRE', 'QuickBooks Desktop Connector', 'Netsuite', 'Xero', 'QuickBooks Online', 'Sage Intacct', 'Sage 50 (US)']:
             filters['active'] = True
 
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
 
         if source_type == 'EMPLOYEE':
-            filters = {}
+            filters = {'source_employee__active': True}
 
             if destination_type == 'VENDOR':
                 filters['destination_vendor__attribute_type'] = destination_type
@@ -216,7 +216,7 @@ class MappingStatsView(ListCreateAPIView):
 
             if app_name == 'XERO':
                 mapped_attributes_count = Mapping.objects.filter(
-                    workspace_id=self.kwargs['workspace_id'], source_type='EMPLOYEE'
+                    workspace_id=self.kwargs['workspace_id'], source_type='EMPLOYEE', source__active=True
                 ).count()
             else:
                 mapped_attributes_count = EmployeeMapping.objects.filter(
