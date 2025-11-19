@@ -210,7 +210,7 @@ class MappingStatsView(ListCreateAPIView):
 
             # For QuickBooks Desktop with both vendor and employee mapping enabled, include all mappings
             # Otherwise, filter by specific destination_type
-            if not (app_name == 'QuickBooks Desktop' and employee_vendor_purchase_from == 'true'):
+            if not (app_name == 'QuickBooks Desktop Connector' and employee_vendor_purchase_from == 'true'):
                 if destination_type == 'VENDOR':
                     filters['destination_vendor__attribute_type'] = destination_type
                 else:
@@ -435,10 +435,10 @@ class EmployeeAttributesMappingView(ListAPIView):
             mapped = None
 
         filters = {}
-        
+
         # For QuickBooks Desktop with both vendor and employee mapping enabled, include all mappings
         # Otherwise, filter by specific destination_type
-        if not (app_name == 'QuickBooks Desktop' and employee_vendor_purchase_from == 'true'):
+        if not (app_name == 'QuickBooks Desktop Connector' and employee_vendor_purchase_from == 'true'):
             if destination_type == 'VENDOR':
                 filters['destination_vendor__attribute_type'] = destination_type
             else:
