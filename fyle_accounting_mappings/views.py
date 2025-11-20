@@ -206,21 +206,24 @@ class MappingStatsView(ListCreateAPIView):
         total_attributes_count = ExpenseAttribute.objects.filter(**filters).count()
 
         if source_type == 'EMPLOYEE':
-            filters = {'source_employee__active': True}
-
-            # For QuickBooks Desktop with both vendor and employee mapping enabled, include all mappings
-            # Otherwise, filter by specific destination_type
-            if not (app_name == 'QuickBooks Desktop Connector' and employee_vendor_purchase_from == 'true'):
+            if app_name == 'XERO':
+                mapped_attributes_count = Mapping.objects.filter(
+                    workspace_id=self.kwargs['workspace_id'], source_type='EMPLOYEE', source__active=True
+                ).count()
+            elif app_name == 'QuickBooks Desktop Connector' and employee_vendor_purchase_from == 'true':
+                mapped_attributes_count = EmployeeMapping.objects.filter(
+                    workspace_id=self.kwargs['workspace_id'],
+                    source_employee__active=True
+                ).filter(
+                    Q(destination_vendor__isnull=False) | Q(destination_employee__isnull=False)
+                ).count()
+            else:
+                filters = {'source_employee__active': True}
                 if destination_type == 'VENDOR':
                     filters['destination_vendor__attribute_type'] = destination_type
                 else:
                     filters['destination_employee__attribute_type'] = destination_type
 
-            if app_name == 'XERO':
-                mapped_attributes_count = Mapping.objects.filter(
-                    workspace_id=self.kwargs['workspace_id'], source_type='EMPLOYEE', source__active=True
-                ).count()
-            else:
                 mapped_attributes_count = EmployeeMapping.objects.filter(
                     **filters, workspace_id=self.kwargs['workspace_id']
                 ).count()
@@ -438,17 +441,22 @@ class EmployeeAttributesMappingView(ListAPIView):
 
         # For QuickBooks Desktop with both vendor and employee mapping enabled, include all mappings
         # Otherwise, filter by specific destination_type
-        if not (app_name == 'QuickBooks Desktop Connector' and employee_vendor_purchase_from == 'true'):
+        if app_name == 'QuickBooks Desktop Connector' and employee_vendor_purchase_from == 'true':
+            source_employees = EmployeeMapping.objects.filter(
+                workspace_id=self.kwargs['workspace_id']
+            ).filter(
+                Q(destination_vendor__isnull=False) | Q(destination_employee__isnull=False)
+            ).values_list('source_employee_id', flat=True)
+        else:
             if destination_type == 'VENDOR':
                 filters['destination_vendor__attribute_type'] = destination_type
             else:
                 filters['destination_employee__attribute_type'] = destination_type
 
-        source_employees = EmployeeMapping.objects.filter(
-            **filters,
-            workspace_id=self.kwargs['workspace_id'],
-        ).values_list('source_employee_id', flat=True)
-
+            source_employees = EmployeeMapping.objects.filter(
+                **filters,
+                workspace_id=self.kwargs['workspace_id'],
+            ).values_list('source_employee_id', flat=True)
         filters = {
             'workspace_id': self.kwargs['workspace_id'],
             'attribute_type': 'EMPLOYEE'
