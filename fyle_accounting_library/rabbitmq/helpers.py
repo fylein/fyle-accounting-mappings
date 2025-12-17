@@ -1,4 +1,5 @@
 import logging
+import traceback
 from typing import List
 from django.core.management import call_command
 from django.utils.module_loading import import_string
@@ -26,12 +27,12 @@ class TaskChainRunner:
             try:
                 import_string(task.target)(*task.args, **task.kwargs)
             except Exception as e:
-                logger.error(f"Error while executing {task.target} with args {task.args} and kwargs {task.kwargs}: {e}")
+                logger.error(f"Error while executing {task.target} with args {task.args} and kwargs {task.kwargs} : {e} \n {traceback.format_exc()}")
                 FailedEvent.objects.create(
                     routing_key=task.target,
                     payload=task.to_json(),
                     workspace_id=workspace_id,
-                    error_traceback=str(e)
+                    error_traceback=traceback.format_exc()
                 )
 
 
