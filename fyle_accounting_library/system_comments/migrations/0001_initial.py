@@ -26,7 +26,6 @@ class Migration(migrations.Migration):
                 ('is_user_visible', models.BooleanField(default=False)),
                 ('detail', models.JSONField(default=dict)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
                 ('workspace', models.ForeignKey(db_index=True, on_delete=django.db.models.deletion.PROTECT, to='workspaces.workspace')),
             ],
             options={
