@@ -1,6 +1,8 @@
 import logging
 import importlib
+from typing import Optional
 
+from fyle.platform.exceptions import InternalServerError, InvalidTokenError
 from fyle_integrations_platform_connector import PlatformConnector
 
 from fyle_accounting_mappings.models import ExpenseAttribute
@@ -90,3 +92,59 @@ def get_expense_attribute_types(workspace_id: int) -> list[dict]:
         expense_attributes.append(attribute)
 
     return expense_attributes
+
+
+def get_employee_expense_attribute(value: str, workspace_id: int) -> Optional[ExpenseAttribute]:
+    """
+    Get employee expense attribute
+    :param value: Employee email
+    :param workspace_id: Workspace ID
+    :return: ExpenseAttribute or None
+    """
+    return ExpenseAttribute.objects.filter(
+        attribute_type='EMPLOYEE',
+        value=value,
+        workspace_id=workspace_id
+    ).first()
+
+
+def sync_inactive_employee(employee_email: str, workspace_id: int) -> Optional[ExpenseAttribute]:
+    """
+    Sync inactive employee from Fyle to expense attributes.
+    Use when an expense references an inactive employee not yet present in ExpenseAttribute.
+    :param employee_email: Employee email address
+    :param workspace_id: Workspace ID
+    :return: ExpenseAttribute if synced successfully, None otherwise
+    """
+    try:
+        fyle_credentials = FyleCredential.objects.get(workspace_id=workspace_id)
+        platform = PlatformConnector(fyle_credentials=fyle_credentials)
+
+        fyle_employee = platform.employees.get_employee_by_email(employee_email)
+        if len(fyle_employee):
+            fyle_employee = fyle_employee[0]
+            attribute = {
+                'attribute_type': 'EMPLOYEE',
+                'display_name': 'Employee',
+                'value': fyle_employee['user']['email'],
+                'source_id': fyle_employee['id'],
+                'active': True if fyle_employee['is_enabled'] and fyle_employee['has_accepted_invite'] else False,
+                'detail': {
+                    'user_id': fyle_employee['user_id'],
+                    'employee_code': fyle_employee['code'],
+                    'full_name': fyle_employee['user']['full_name'],
+                    'location': fyle_employee['location'],
+                    'department': fyle_employee['department']['name'] if fyle_employee['department'] else None,
+                    'department_id': fyle_employee['department_id'],
+                    'department_code': fyle_employee['department']['code'] if fyle_employee['department'] else None
+                }
+            }
+            ExpenseAttribute.bulk_create_or_update_expense_attributes([attribute], 'EMPLOYEE', workspace_id, True)
+            return get_employee_expense_attribute(employee_email, workspace_id)
+    except (InvalidTokenError, InternalServerError) as e:
+        logger.info('Invalid Fyle refresh token or internal server error for workspace %s: %s', workspace_id, str(e))
+        return None
+
+    except Exception as e:
+        logger.error('Error syncing inactive employee for workspace_id %s: %s', workspace_id, str(e))
+        return None
