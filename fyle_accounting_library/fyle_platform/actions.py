@@ -1,11 +1,13 @@
 import logging
 import importlib
-from typing import Optional
+from typing import Optional,List
+from datetime import datetime, timedelta
 
 from fyle.platform.exceptions import InternalServerError, InvalidTokenError
 from fyle_integrations_platform_connector import PlatformConnector
 
 from fyle_accounting_mappings.models import ExpenseAttribute
+from fyle_integrations_imports.models import ImportLog
 from fyle_accounting_library.common_resources.helpers import get_current_utc_datetime
 from fyle_accounting_library.fyle_platform.enums import (
     DefaultFyleConditionsEnum,
@@ -148,3 +150,13 @@ def sync_inactive_employee(employee_email: str, workspace_id: int) -> Optional[E
     except Exception as e:
         logger.error('Error syncing inactive employee for workspace_id %s: %s', workspace_id, str(e))
         return None
+
+
+def reset_stuck_imports(workspace_ids_list: List[int]):
+    """
+    Reset stuck imports for a list of workspaces
+    """
+    import_logs = ImportLog.objects.filter(workspace_id__in=workspace_ids_list, status='IN_PROGRESS', updated_at__lt=datetime.now() - timedelta(minutes=120))
+    if import_logs.exists():
+        logger.info('Stuck import logs found: %s', import_logs.count())
+        import_logs.update(status='FAILED', updated_at=datetime.now())
