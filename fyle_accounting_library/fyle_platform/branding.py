@@ -11,22 +11,15 @@ class Configuration:
     fixed_employee_field_mapping: Union[str, bool]
 
 @dataclass
-class Feature:
-    real_time_export_1hr_orgs: bool
-
-@dataclass
 class FeatureConfig:
     configuration: Configuration
-    feature: Feature
 
 configurations = {
     BrandIdEnum.CO: FeatureConfig(
-        configuration=Configuration(fixed_employee_field_mapping='VENDOR'),
-        feature=Feature(real_time_export_1hr_orgs=False)
+        configuration=Configuration(fixed_employee_field_mapping='VENDOR')
     ),
     BrandIdEnum.FYLE: FeatureConfig(
-        configuration=Configuration(fixed_employee_field_mapping=False),
-        feature=Feature(real_time_export_1hr_orgs=True)
+        configuration=Configuration(fixed_employee_field_mapping=False)
     )
 }
 
