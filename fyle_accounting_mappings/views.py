@@ -459,7 +459,8 @@ class EmployeeAttributesMappingView(ListAPIView):
             ).values_list('source_employee_id', flat=True)
         filters = {
             'workspace_id': self.kwargs['workspace_id'],
-            'attribute_type': 'EMPLOYEE'
+            'attribute_type': 'EMPLOYEE',
+            'active': True
         }
 
         param = None
