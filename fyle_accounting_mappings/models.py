@@ -149,6 +149,9 @@ class ExpenseAttribute(models.Model):
     class Meta:
         db_table = 'expense_attributes'
         unique_together = ('value', 'attribute_type', 'workspace')
+        indexes = [
+            models.Index(fields=['workspace_id', 'attribute_type']),
+        ]
 
     @staticmethod
     def create_or_update_expense_attribute(attribute: Dict, workspace_id):
@@ -346,6 +349,9 @@ class DestinationAttribute(models.Model):
     class Meta:
         db_table = 'destination_attributes'
         unique_together = ('destination_id', 'attribute_type', 'workspace', 'display_name')
+        indexes = [
+            models.Index(fields=['workspace_id', 'attribute_type']),
+        ]
 
     @staticmethod
     def create_or_update_destination_attribute(attribute: Dict, workspace_id):
@@ -853,6 +859,9 @@ class Mapping(models.Model):
     class Meta:
         unique_together = ('source_type', 'source', 'destination_type', 'workspace')
         db_table = 'mappings'
+        indexes = [
+            models.Index(fields=['workspace_id', 'source_type', 'destination_type']),
+        ]
 
     @staticmethod
     def create_or_update_mapping(source_type: str, destination_type: str,
@@ -1059,6 +1068,9 @@ class EmployeeMapping(models.Model):
 
     class Meta:
         db_table = 'employee_mappings'
+        indexes = [
+            models.Index(fields=['workspace_id', 'source_employee_id']),
+        ]
 
     @staticmethod
     def create_or_update_employee_mapping(
@@ -1103,6 +1115,9 @@ class CategoryMapping(models.Model):
 
     class Meta:
         db_table = 'category_mappings'
+        indexes = [
+            models.Index(fields=['workspace_id', 'source_category_id']),
+        ]
 
     @staticmethod
     def create_or_update_category_mapping(
