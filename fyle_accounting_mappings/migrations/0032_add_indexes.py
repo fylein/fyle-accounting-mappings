@@ -19,10 +19,6 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['workspace_id', 'attribute_type'], name='fyle_accoun_workspa_da_idx'),
         ),
         migrations.AddIndex(
-            model_name='mappingsetting',
-            index=models.Index(fields=['workspace_id', 'destination_field'], name='fyle_accoun_workspa_ms_idx'),
-        ),
-        migrations.AddIndex(
             model_name='mapping',
             index=models.Index(fields=['workspace_id', 'source_type', 'destination_type'], name='fyle_accoun_workspa_mp_idx'),
         ),

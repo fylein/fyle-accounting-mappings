@@ -816,9 +816,6 @@ class MappingSetting(AutoAddCreateUpdateInfoMixin, models.Model):
     class Meta:
         unique_together = ('source_field', 'destination_field', 'workspace')
         db_table = 'mapping_settings'
-        indexes = [
-            models.Index(fields=['workspace_id', 'destination_field']),
-        ]
 
     @staticmethod
     def bulk_upsert_mapping_setting(settings: List[Dict], workspace_id: int):
