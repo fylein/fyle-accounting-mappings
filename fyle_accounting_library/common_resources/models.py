@@ -88,6 +88,7 @@ class DataMigrationBatch(models.Model):
     started_at = models.DateTimeField(null=True, help_text='Started At')
     completed_at = models.DateTimeField(null=True, help_text='Completed At')
     failed_at = models.DateTimeField(null=True, help_text='Failed At')
+    error = models.JSONField(null=True, help_text='Error')
     created_at = models.DateTimeField(auto_now_add=True, help_text='Created At')
     updated_at = models.DateTimeField(auto_now=True, help_text='Updated At')
 
