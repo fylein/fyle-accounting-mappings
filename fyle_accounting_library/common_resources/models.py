@@ -73,3 +73,47 @@ class DimensionDetail(models.Model):
 
         if dimensions_to_be_updated:
             DimensionDetail.objects.bulk_update(dimensions_to_be_updated, ['display_name'], batch_size=50)
+
+
+class DataMigrationBatch(models.Model):
+    """
+    Data Migration Batch
+    """
+    id = models.AutoField(primary_key=True)
+    object_ids = models.JSONField(default=list, help_text='Object IDs')
+    procedure_name = models.TextField(null=False, help_text='Procedure Name')
+    max_attempts = models.IntegerField(default=3, help_text='Max Attempts')
+    num_attempts = models.IntegerField(default=0, help_text='Number of Attempts')
+    started_at = models.DateTimeField(null=True, help_text='Started At')
+    completed_at = models.DateTimeField(null=True, help_text='Completed At')
+    failed_at = models.DateTimeField(null=True, help_text='Failed At')
+    created_at = models.DateTimeField(auto_now_add=True, help_text='Created At')
+    updated_at = models.DateTimeField(auto_now=True, help_text='Updated At')
+
+    class Meta:
+        db_table = 'data_migration_batches'
+        indexes = [
+            # 1. Fast lookup for fresh batches
+            models.Index(
+                fields=['id'],
+                condition=models.Q(num_attempts=0, completed_at__isnull=True),
+                name='dmb_unprocessed_idx'
+            ),
+
+            # 2. Fast lookup for retry batches
+            models.Index(
+                fields=['id', 'num_attempts'],
+                condition=models.Q(completed_at__isnull=True, num_attempts__gt=0),
+                name='dmb_retry_idx'
+            ),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(num_attempts__lte=models.F('max_attempts')),
+                name='num_attempts_lte_max_attempts'
+            ),
+            models.CheckConstraint(
+                check=models.Q(models.Func(models.F('object_ids'), function='jsonb_array_length') <= 200),
+                name='object_ids_length_lte_200'
+            )
+        ]
