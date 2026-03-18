@@ -82,6 +82,7 @@ class DataMigrationBatch(models.Model):
     id = models.AutoField(primary_key=True)
     object_ids = models.JSONField(default=list, help_text='Object IDs')
     procedure_name = models.TextField(null=False, help_text='Procedure Name')
+    database_name = models.CharField(null=False, max_length=100, help_text='Database Name')
     max_attempts = models.IntegerField(default=3, help_text='Max Attempts')
     num_attempts = models.IntegerField(default=0, help_text='Number of Attempts')
     started_at = models.DateTimeField(null=True, help_text='Started At')
@@ -93,18 +94,15 @@ class DataMigrationBatch(models.Model):
     class Meta:
         db_table = 'data_migration_batches'
         indexes = [
-            # 1. Fast lookup for fresh batches
             models.Index(
-                fields=['id'],
+                fields=['database_name', 'id'],
+                name='idx_dmb_unprocessed',
                 condition=models.Q(num_attempts=0, completed_at__isnull=True),
-                name='dmb_unprocessed_idx'
             ),
-
-            # 2. Fast lookup for retry batches
             models.Index(
-                fields=['id', 'num_attempts'],
+                fields=['database_name', 'num_attempts', 'id'],
+                name='idx_dmb_retry',
                 condition=models.Q(completed_at__isnull=True, num_attempts__gt=0),
-                name='dmb_retry_idx'
             ),
         ]
         constraints = [

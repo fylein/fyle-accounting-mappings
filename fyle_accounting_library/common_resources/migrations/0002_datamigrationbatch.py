@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('object_ids', models.JSONField(default=list, help_text='Object IDs')),
                 ('procedure_name', models.TextField(help_text='Procedure Name')),
+                ('database_name', models.CharField(max_length=100, help_text='Database Name')),
                 ('max_attempts', models.IntegerField(default=3, help_text='Max Attempts')),
                 ('num_attempts', models.IntegerField(default=0, help_text='Number of Attempts')),
                 ('started_at', models.DateTimeField(help_text='Started At', null=True)),
@@ -26,18 +27,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'data_migration_batches',
-                'indexes': [
-                    models.Index(
-                        condition=models.Q(num_attempts=0, completed_at__isnull=True),
-                        fields=['id'],
-                        name='dmb_unprocessed_idx',
-                    ),
-                    models.Index(
-                        condition=models.Q(completed_at__isnull=True, num_attempts__gt=0),
-                        fields=['id', 'num_attempts'],
-                        name='dmb_retry_idx',
-                    ),
-                ],
                 'constraints': [
                     models.CheckConstraint(
                         check=models.Q(num_attempts__lte=models.F('max_attempts')),
