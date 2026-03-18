@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 from apps.workspaces.models import Workspace
 
@@ -80,7 +81,7 @@ class DataMigrationBatch(models.Model):
     Data Migration Batch
     """
     id = models.AutoField(primary_key=True)
-    object_ids = models.JSONField(default=list, help_text='Object IDs')
+    object_ids = ArrayField(models.IntegerField(), help_text='Object IDs')
     procedure_name = models.TextField(null=False, help_text='Procedure Name')
     database_name = models.CharField(null=False, max_length=100, help_text='Database Name')
     max_attempts = models.IntegerField(default=3, help_text='Max Attempts')
@@ -112,7 +113,7 @@ class DataMigrationBatch(models.Model):
                 name='num_attempts_lte_max_attempts'
             ),
             models.CheckConstraint(
-                check=models.Q(models.Func(models.F('object_ids'), function='jsonb_array_length') <= 200),
-                name='object_ids_length_lte_200'
-            )
+                check=models.Q(object_ids__len__lte=200),
+                name='object_ids_len_lte_200'
+            ),
         ]
